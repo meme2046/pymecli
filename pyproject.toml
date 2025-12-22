@@ -14,10 +14,14 @@
         "onnx-paddleocr>=0.2.1",
         "opencv-python>=4.11.0.86",
         "pandas>=2.3.3",
+        "pydantic-settings>=2.12.0",
+        "pytz>=2025.2",
         "pyyaml>=6.0.3",
         "requests[socks]>=2.32.5",
         "sqlalchemy>=2.0.45",
+        "toml>=0.10.2",
         "torch>=2.9.1",
+        "typer>=0.20.1",
         "uvicorn>=0.40.0",
     ]
     description = "My CLI"
@@ -32,10 +36,11 @@
         Repository = "https://github.com/meme2046/pymecli"
 
     [project.scripts]
-        bitget = "cli.bitget:app"
-        clash  = "cli.clash:cli"
-        gate   = "cli.gate:app"
-        util   = "cli.util:app"
+        bitget  = "cli.bitget:app"
+        example = "cli.example:app"
+        fast    = "cli.fast:typer_app"
+        gate    = "cli.gate:app"
+        util    = "cli.util:app"
 
 
 [tool.uv]
