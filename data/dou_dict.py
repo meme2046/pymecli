@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict
 
 text_map: Dict[str, str] = dict(
@@ -127,20 +128,23 @@ to_env_card_map = {
     "4": 4,
     "3": 3,
 }
-# resnet2022
-# resnet
+
+module_dir = Path(__file__).resolve().parent.parent
+
 model_path_map = {
-    "landlord": "baselines/resnet/resnet_landlord.ckpt",
-    "landlord_up": "baselines/resnet/resnet_landlord_up.ckpt",
-    "landlord_down": "baselines/resnet/resnet_landlord_down.ckpt",
+    "landlord": str(module_dir / "baselines/resnet/resnet_landlord.ckpt"),
+    "landlord_up": str(module_dir / "baselines/resnet/resnet_landlord_up.ckpt"),
+    "landlord_down": str(module_dir / "baselines/resnet/resnet_landlord_down.ckpt"),
 }
 
 weights_path_map = {
-    "bid_weights": "douzero/weights/bid_weights.pkl",
-    "farmer_weights": "douzero/weights/farmer_weights.pkl",
-    "landlord_down_weights": "douzero/weights/landlord_down_weights.pkl",
-    "landlord_up_weights": "douzero/weights/landlord_up_weights.pkl",
-    "landlord_weights": "douzero/weights/landlord_weights.pkl",
+    "bid_weights": str(module_dir / "douzero/weights/bid_weights.pkl"),
+    "farmer_weights": str(module_dir / "douzero/weights/farmer_weights.pkl"),
+    "landlord_down_weights": str(
+        module_dir / "douzero/weights/landlord_down_weights.pkl"
+    ),
+    "landlord_up_weights": str(module_dir / "douzero/weights/landlord_up_weights.pkl"),
+    "landlord_weights": str(module_dir / "douzero/weights/landlord_weights.pkl"),
 }
 
 position_name_map = {

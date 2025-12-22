@@ -1541,7 +1541,7 @@ wheels = [
 
 [[package]]
 name = "pymecli"
-version = "0.1.2"
+version = "0.1.8"
 source = { editable = "." }
 dependencies = [
     { name = "arrow" },

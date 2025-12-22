@@ -1,8 +1,8 @@
-FROM registry.cn-chengdu.aliyuncs.com/jusu/ub24:latest
+FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 
 # 更新包索引并尝试安装 mkcert
-RUN brew install mkcert
-RUN brew cleanup
+RUN apt-get update && apt-get install -y mkcert && apt clean && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /etc/mkcert
 RUN uv tool install pymecli -i https://pypi.org/simple
 RUN uv tool upgrade --all -i https://pypi.org/simple

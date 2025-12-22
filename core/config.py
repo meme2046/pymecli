@@ -1,17 +1,23 @@
+import importlib.metadata
+
 from pydantic_settings import BaseSettings
 
-from utils.toml import read_toml
+metadata = importlib.metadata.metadata("pymecli")
+# module_dir = Path(__file__).resolve().parent.parent
 
-project = read_toml("./pyproject.toml")["project"]
+# project = read_toml(str(module_dir / "./pyproject.toml"))["project"]
 
 
 class Settings(BaseSettings):
     # API配置
     API_V1_STR: str = "/api/v1"
-    NAME: str = project["name"]
-    DESCRIPTION: str = f"{project['description']},"
-    "FastAPI提供[onnx-paddleocr识别、douzero、clash订阅转换]"
-    VERSION: str = project["version"]
+    NAME: str = metadata["Name"]
+    DESCRIPTION: str = f"{metadata['Summary']}, FastAPI提供[onnx-paddleocr识别、douzero、clash订阅转换]"
+    VERSION: str = metadata["Version"]
+
+    print(f"project:{NAME}")
+    print(f"version:{VERSION}")
+    print(f"description:{DESCRIPTION}")
 
     class Config:
         env_prefix = "MY_CLI_API_"  # 添加环境变量前缀

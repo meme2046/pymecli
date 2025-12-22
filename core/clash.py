@@ -1,8 +1,11 @@
 import os
+from pathlib import Path
 
 import requests
 import yaml
 from fastapi import Depends
+
+module_dir = Path(__file__).resolve().parent.parent
 
 
 class ClashConfig:
@@ -26,7 +29,7 @@ class ClashYamlGenerator:
                 "https": self.request_proxy,
             }
 
-        with open("./data/template.yaml", "r", encoding="utf-8") as f:
+        with open(str(module_dir / "data/template.yaml"), "r", encoding="utf-8") as f:
             template = yaml.safe_load(f)
 
         template["proxy-groups"].extend(

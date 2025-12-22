@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import cast
 
 from fastapi import APIRouter, Body, Query
@@ -10,6 +11,7 @@ from models.douzero_model import BidScoreRequest, PlayRequest, PreGameScoreReque
 from models.response import SuccessResponse
 from utils.card import cards_env_to_other_env, cards_to_env, env_to_cards
 
+module_dir = Path(__file__).resolve().parent.parent.parent
 router = APIRouter()
 
 
@@ -115,7 +117,13 @@ async def play(
         ]: other_env[0:17] if (position_code + 1) % 3 == 1 else other_env[17:],
     }
 
-    AI = [position, DeepAgent(position, model_path_map[position])]
+    AI = [
+        position,
+        DeepAgent(
+            position,
+            str(module_dir / model_path_map[position]),
+        ),
+    ]
     game_env = GameEnv(AI)
     game_env.card_play_init(play_data_list)
     for i, played_cards in enumerate(played_list):

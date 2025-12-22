@@ -1,3 +1,5 @@
+import os
+
 import typer
 import uvicorn
 from fastapi import FastAPI
@@ -14,7 +16,12 @@ from douzero import LandlordModel
 from models import SuccessResponse
 
 typer_app = typer.Typer()
-LandlordModel.init_model(model_path_map["landlord"])
+
+
+model_path = model_path_map["landlord"]
+if not os.path.exists(model_path):
+    raise Exception("模型文件不存在")
+LandlordModel.init_model(model_path)
 
 app = FastAPI(
     title=settings.NAME,
@@ -79,7 +86,8 @@ async def general_exception_handler(request, exc):
 
 @app.get("/")
 async def root():
-    return SuccessResponse(data=f"Welcome to {settings.NAME}")
+    # return SuccessResponse(data=f"Welcome to {settings.NAME}")
+    return SuccessResponse(data="Welcome to My CLI FastAPI")
 
 
 @app.get("/ping", response_class=PlainTextResponse)
