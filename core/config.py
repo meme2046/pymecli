@@ -15,9 +15,9 @@ class Settings(BaseSettings):
     DESCRIPTION: str = f"{metadata['Summary']}, FastAPI提供[onnx-paddleocr识别、douzero、clash订阅转换]"
     VERSION: str = metadata["Version"]
 
-    print(f"project:{NAME}")
-    print(f"version:{VERSION}")
-    print(f"description:{DESCRIPTION}")
+    print(f"project: {NAME}")
+    print(f"version: {VERSION}")
+    print(f"description: {DESCRIPTION}")
 
     class Config:
         env_prefix = "MY_CLI_API_"  # 添加环境变量前缀

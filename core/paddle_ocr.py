@@ -10,8 +10,8 @@ from utils.text import match_text, normalize_text
 
 model = ONNXPaddleOcr(
     use_angle_cls=False,
-    use_gpu=True,
-    cpu_threads=16,  # CPU推理线程数
+    use_gpu=False,
+    cpu_threads=8,  # CPU推理线程数
 )
 
 
