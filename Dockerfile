@@ -1,19 +1,10 @@
 FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
-# FROM registry.cn-chengdu.aliyuncs.com/jusu/ub24:latest
 RUN apt update
 RUN apt install -y mkcert  
 RUN apt install -y libopencv-dev
-# RUN apt install -y \
-#     libgl1-mesa-glx \
-#     libglib2.0-0 \
-#     libsm6 \
-#     libxext6 \
-#     libxrender-dev \
-#     libgomp1
+
 RUN apt clean
 RUN rm -rf /var/lib/apt/lists/*
-# RUN brew install mkcert
-# RUN brew cleanup
 RUN mkdir -p /etc/mkcert
 
 RUN uv python list
