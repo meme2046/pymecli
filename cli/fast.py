@@ -13,7 +13,7 @@ from core.clash import ClashConfig, init_generator
 from core.config import settings
 from data.dou_dict import model_path_map
 from douzero import LandlordModel
-from models import SuccessResponse
+from models.response import SuccessResponse
 
 typer_app = typer.Typer()
 

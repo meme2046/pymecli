@@ -12,8 +12,16 @@ fi
 # windows 下生成证书⬇️⬇️⬇️
 # mkcert -cert-file d:/.ssh/mkcert/cert.pem -key-file d:/.ssh/mkcert/key.pem example.com localhost 127.0.0.1 ::1 192.168.123.7
 
+# 添加代理参数支持
+PROXY_ARG=""
+if [ -n "$PROXY" ]; then # -n: non-empty
+    PROXY_ARG="--proxy $PROXY"
+fi
+
 # 启动 FastAPI 服务
-fast --port 80 \
-  --proxy socks5://192.168.123.7:7890 \
+eval "fast 0.0.0.0 --port 80 \
   --ssl-keyfile /etc/mkcert/key.pem \
-  --ssl-certfile /etc/mkcert/cert.pem
+  --ssl-certfile /etc/mkcert/cert.pem \
+  --rule https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release \
+  --my-rule https://raw.githubusercontent.com/meme2046/data/refs/heads/main/clash \
+  $PROXY_ARG"

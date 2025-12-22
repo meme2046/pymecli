@@ -5,13 +5,13 @@ import numpy as np
 from fastapi import APIRouter, Body
 
 from core.paddle_ocr import find_text_n, find_text_one, find_text_regions, find_texts
-from models import SuccessResponse
 from models.ocr_model import (
     FindCardsRequest,
     FindNRequest,
     FindOneRequest,
     FindRegionsRequest,
 )
+from models.response import SuccessResponse
 from utils.card import sort_cards
 
 router = APIRouter()
