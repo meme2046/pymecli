@@ -94,7 +94,7 @@ def run_app(
         help="fastapi监听的<ip>地址",
     ),
     port: int = typer.Option(
-        443,
+        80,
         "--port",
         help="fastapi监听的端口号",
     ),
