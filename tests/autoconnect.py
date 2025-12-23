@@ -2,9 +2,6 @@ import re
 import telnetlib
 import time
 
-MAC = "34:2D:A3:C1:A8:F4"
-IP = "192.168.1.1"
-
 
 def validate_ip(ip):
     pattern = r"^(\d{1,3}\.){3}\d{1,3}$"
@@ -108,7 +105,9 @@ def main():
     ip = input("请输入光猫IP地址(格式如192.168.1.1): ") or "192.168.1.1"
     validate_ip(ip)
 
-    mac = validate_mac(input("请输入MAC地址(格式如68:40:3C:C4:C0:E4): "))
+    mac = validate_mac(
+        input("请输入MAC地址(格式如68:40:3C:C4:C0:E4): ") or "34:2D:A3:C1:A8:F4"
+    )
     print("\n⚠️ 请先手动开启Telnet：")
     print(
         f"1. 打开浏览器访问：http://{ip}:8080/cgi-bin/telnetenable.cgi?telnetenable=1&key={mac}"
