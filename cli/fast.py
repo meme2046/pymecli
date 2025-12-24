@@ -86,8 +86,7 @@ async def general_exception_handler(request, exc):
 
 @app.get("/")
 async def root():
-    # return SuccessResponse(data=f"Welcome to {settings.NAME}")
-    return SuccessResponse(data="Welcome to My CLI FastAPI")
+    return SuccessResponse(data=f"Welcome to {settings.DESCRIPTION}")
 
 
 @app.get("/ping", response_class=PlainTextResponse)
