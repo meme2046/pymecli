@@ -21,8 +21,14 @@
 	"tabWidth": 2,
 	"useTabs": true,
 	"embeddedLanguageFormatting": "auto",
-	"plugins": ["@prettier/plugin-xml"],
+	"plugins": [
+		"@prettier/plugin-xml",
+		"prettier-plugin-toml",
+		"prettier-plugin-nginx"
+	],
 	"xmlWhitespaceSensitivity": "strict",
 	"xmlSortAttributesByKey": true,
-	"xmlSelfClosingSpace": true
+	"xmlSelfClosingSpace": true,
+	"indentEntries": true,
+	"reorderKeys": true
 }

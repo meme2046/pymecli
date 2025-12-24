@@ -15,12 +15,11 @@
 # 添加代理参数支持
 PROXY_ARG=""
 if [ -n "$PROXY" ]; then # -n: non-empty
-    PROXY_ARG="--proxy $PROXY"
+  PROXY_ARG="--proxy $PROXY"
 fi
 
 # --ssl-keyfile /etc/mkcert/key.pem \
 # --ssl-certfile /etc/mkcert/cert.pem \
-
 # 启动 FastAPI 服务
 eval "fast 0.0.0.0 --port 80 \
   --rule https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release \

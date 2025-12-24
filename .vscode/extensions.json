@@ -8,8 +8,8 @@
 		"njpwerner.autodocstring",
 		// 通用
 		"esbenp.prettier-vscode",
-		"tamasfe.even-better-toml",
 		"TheNuProjectContributors.vscode-nushell-lang",
+		"lumirelle.shell-format-rev",
 		// 美化
 		"oderwat.indent-rainbow",
 		"mechatroner.rainbow-csv",

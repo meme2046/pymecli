@@ -1,6 +1,9 @@
 {
 	"devDependencies": {
 		"@prettier/plugin-xml": "^3.4.2",
-		"prettier": "^3.7.4"
+		"prettier": "^3.7.4",
+		"prettier-plugin-nginx": "^1.0.3",
+		"prettier-plugin-solidity": "^2.2.1",
+		"prettier-plugin-toml": "^2.0.6"
 	}
 }

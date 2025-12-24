@@ -1,6 +1,6 @@
 FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 RUN apt update
-# RUN apt install -y mkcert  
+# RUN apt install -y mkcert
 RUN apt install -y libopencv-dev
 
 RUN apt clean
