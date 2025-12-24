@@ -44,6 +44,9 @@
 	util = "cli.util:app"
 
 [tool.uv]
+	required-environments = [
+		"sys_platform == 'linux' and platform_machine == 'x86_64'",
+	]
 [[tool.uv.index]]
 	default = true
 	url = "https://mirrors.aliyun.com/pypi/simple/"
