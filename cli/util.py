@@ -16,7 +16,7 @@ app = typer.Typer()
 
 @app.command()
 def sid(
-    length: int = typer.Option(30, "--length", "-l", help="生成secure_id的长度"),
+    length: int = typer.Argument(30, help="生成secure_id的长度"),
 ):
     chars = string.ascii_letters + string.digits
     id = "".join(secrets.choice(chars) for _ in range(length))

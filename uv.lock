@@ -12,9 +12,6 @@ resolution-markers = [
     "python_full_version < '3.11' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version < '3.11' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.11' and sys_platform != 'darwin' and sys_platform != 'linux')",
 ]
-required-markers = [
-    "platform_machine == 'x86_64' and sys_platform == 'linux'",
-]
 
 [[package]]
 name = "annotated-doc"
@@ -1257,7 +1254,7 @@ wheels = [
 
 [[package]]
 name = "pymecli"
-version = "0.2.0"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "arrow" },
