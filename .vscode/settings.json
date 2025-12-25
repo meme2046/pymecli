@@ -56,7 +56,9 @@
 		"notebook.source.organizeImports": "explicit" // notebook 保存时自动排序 import 语句
 	},
 	"editor.formatOnSave": true, // 保存时格式化
-	"prettier.configPath": ".vscode/.prettierrc.json",
+	"prettier.documentSelectors": ["text.plain", "nginx.nginx"],
+	"prettier.configPath": ".vscode/.prettierrc",
+	"prettier.ignorePath": ".vscode/.prettierignore",
 	"[javascript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
@@ -65,10 +67,6 @@
 	},
 	"[typescriptreact]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[xml]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"editor.formatOnSave": false
 	},
 	"[css]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -79,10 +77,24 @@
 	"[yaml]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
-	"[nginx]": {
+	"[toml]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
-	"[toml]": {
+	"[xml]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": false
+	},
+	"[svg]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": false
+	},
+	"[dockerfile]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[shellscript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[markdown]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	// 📝彩虹缩进 indent-rainbow 配置
@@ -112,7 +124,6 @@
 		"**/src/components/ui/**/*"
 	],
 	"files.associations": {
-		"*.svg": "xml",
-		".prettierrc": "json"
+		"*.txt": "markdown"
 	}
 }

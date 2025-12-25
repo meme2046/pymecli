@@ -9,7 +9,6 @@
 		// 通用
 		"esbenp.prettier-vscode",
 		"TheNuProjectContributors.vscode-nushell-lang",
-		"lumirelle.shell-format-rev",
 		// 美化
 		"oderwat.indent-rainbow",
 		"mechatroner.rainbow-csv",
