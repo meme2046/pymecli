@@ -1,3 +1,7 @@
+import os
+from contextlib import asynccontextmanager
+
+import redis.asyncio as redis
 import typer
 import uvicorn
 from fastapi import FastAPI
@@ -11,6 +15,28 @@ from core.clash import ClashConfig, init_generator
 from core.config import settings
 from models.response import SuccessResponse
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """管理应用生命周期的上下文管理器"""
+    redis_pool = redis.ConnectionPool(
+        host=os.getenv("REDIS_HOST", "192.168.123.7"),
+        port=int(os.getenv("REDIS_PORT", 6379)),
+        db=int(os.getenv("REDIS_DB", 0)),
+        password=os.getenv("REDIS_PASSWORD"),
+        max_connections=20,  # 根据需要调整最大连接数
+        decode_responses=True,
+    )
+    redis_client = redis.Redis(connection_pool=redis_pool)
+
+    # 启动时
+    app.state.redis_client = redis_client
+    yield
+    # 关闭时
+    if redis_client:
+        await redis_client.aclose()
+
+
 typer_app = typer.Typer()
 
 
@@ -18,6 +44,7 @@ app = FastAPI(
     title=settings.NAME,
     description=settings.DESCRIPTION,
     version=settings.VERSION,
+    lifespan=lifespan,
 )
 
 # 注册 v1 版本的所有路由

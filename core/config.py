@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     print(f"description: {DESCRIPTION}")
 
     class Config:
-        env_prefix = "MY_CLI_API_"  # 添加环境变量前缀
+        env_prefix = "PY_ME_CLI_"  # 添加环境变量前缀
         case_sensitive = True
 
     def reload(self):
