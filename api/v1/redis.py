@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/redis",
+    "/get",
     summary="根据redis.key获取数据",
     response_description="返回json数据",
 )
