@@ -1,0 +1,42 @@
+arrowParens: always
+bracketSameLine: false
+objectWrap: preserve
+bracketSpacing: true
+semi: true
+experimentalOperatorPosition: end
+experimentalTernaries: false
+singleQuote: false
+jsxSingleQuote: false
+quoteProps: as-needed
+trailingComma: all
+singleAttributePerLine: false
+htmlWhitespaceSensitivity: css
+vueIndentScriptAndStyle: false
+proseWrap: preserve
+endOfLine: lf
+insertPragma: false
+printWidth: 80
+requirePragma: false
+tabWidth: 2
+useTabs: false # useTabs 和 tabWidth 不能同时使用
+embeddedLanguageFormatting: auto
+plugins:
+  - "@prettier/plugin-xml"
+  - prettier-plugin-toml
+  - prettier-plugin-properties
+# xml
+xmlWhitespaceSensitivity: strict # Options are `strict`, `preserve`, and `ignore`. You may want `ignore` or `preserve`,default `strict`,default `strict`
+xmlSortAttributesByKey: true
+xmlSelfClosingSpace: true # 在自动关闭标记之前添加空格, default `true`
+# toml
+indentEntries: true # 缩进表下的条目, default `false`
+reorderKeys: true # 按字母顺序重新排列未用空行分隔的键, default `false`
+# nginx
+# wrapParameters: false # 将参数换行以适应打印宽度. default `true`
+# continuationIndent: 2 # default `2`
+# override
+overrides:
+  - files:
+      - "*.txt"
+    options:
+      parser: markdown

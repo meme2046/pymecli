@@ -1,129 +1,172 @@
 {
-	"editor.fontSize": 13,
-	"editor.fontFamily": "Consolas,'Courier New',monospace",
-	// 📝powershelel配置
-	"terminal.integrated.profiles.windows": {
-		"pwsh": {
-			"path": "c:/scoop/shims/pwsh.exe",
-			"args": [],
-			"icon": "terminal-powershell"
-		},
-		"nu": {
-			"path": "c:/scoop/shims/nu.exe",
-			"args": []
-		}
-	},
-	"window.commandCenter": false,
-	"git.autofetch": true,
-	"terminal.integrated.defaultProfile.windows": "nu",
-	"terminal.integrated.automationProfile.windows": {
-		"path": "c:/scoop/shims/pwsh.exe",
-		"args": []
-	},
-	// 终端日志级别
-	"terminal.integrated.enablePersistentSessions": true,
-	"terminal.integrated.showExitAlert": true,
-	// 📝ruff
-	"ruff.fixAll": true,
-	"[python]": {
-		// 📝yapf配置(格式化工具)
-		// "editor.defaultFormatter": "eeyore.yapf",
-		"editor.defaultFormatter": "charliermarsh.ruff",
-		"editor.formatOnSave": true,
-		"editor.codeActionsOnSave": {
-			"source.fixAll.ruff": "explicit", // 保存时自动修复可修复的 lint 错误
-			"source.organizeImports.ruff": "explicit" // 保存时自动排序 import 语句
-		}
-	},
-	"python.analysis.typeCheckingMode": "standard",
-	"python.envFile": "${workspaceFolder}/.env",
-	"terminal.integrated.env.windows": {
-		"PYTHONPATH": "${workspaceFolder}"
-	},
-	"terminal.integrated.env.linux": {
-		"PYTHONPATH": "${workspaceFolder}"
-	},
-	"terminal.integrated.env.osx": {
-		"PYTHONPATH": "${workspaceFolder}"
-	},
-	// 📝jupyter.notebook
-	"jupyter.notebookFileRoot": "${workspaceFolder}", // 📌
-	"notebook.defaultFormatter": "charliermarsh.ruff",
-	"notebook.formatOnSave.enabled": true, // notebook 保存时自动格式化
-	"notebook.output.textLineLimit": 18,
-	"notebook.codeActionsOnSave": {
-		"notebook.source.fixAll": "explicit", // notebook 保存时自动修复可修复的 lint 错误
-		"notebook.source.organizeImports": "explicit" // notebook 保存时自动排序 import 语句
-	},
-	"editor.formatOnSave": true, // 保存时格式化
-	"prettier.documentSelectors": ["text.plain", "nginx.nginx"],
-	"prettier.configPath": ".vscode/.prettierrc",
-	"prettier.ignorePath": ".vscode/.prettierignore",
-	"[javascript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[typescript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[typescriptreact]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[css]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[json]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[yaml]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[toml]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[xml]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"editor.formatOnSave": false
-	},
-	"[svg]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"editor.formatOnSave": false
-	},
-	"[dockerfile]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[shellscript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[markdown]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	// 📝彩虹缩进 indent-rainbow 配置
-	"indentRainbow.ignoreErrorLanguages": ["python", "typescriptreact"],
-	// 📝code-runner
-	"code-runner.clearPreviousOutput": true,
-	"code-runner.executorMap": {
-		"python": "set PYTHONPATH=. && set PYTHONIOENCODING=utf-8 && $pythonPath $fullFileName",
-		"typescript": "node --loader ts-node/esm --disable-warning=ExperimentalWarning"
-	},
-	"json.format.enable": true,
-	"workbench.iconTheme": "vscode-icons",
-	"workbench.colorTheme": "GitHub Dark Colorblind (Beta)",
-	"terminal.integrated.enableMultiLinePasteWarning": "auto",
-	// 📝vscode自带css规则配置
-	"css.validate": true,
-	"css.lint.unknownAtRules": "ignore", // 忽略未知的 @ 规则
-	"css.lint.unknownProperties": "warning", // 对未知的属性发出警告
-	"css.lint.vendorPrefix": "warning", // 对供应商前缀发出警告
-	"css.lint.duplicateProperties": "error", // 对重复的属性发出错误
-	"css.lint.emptyRules": "warning",
-	"tailwindCSS.files.exclude": [
-		"**/.git/**",
-		"**/node_modules/**",
-		"**/.hg/**",
-		"**/.svn/**",
-		"**/src/components/ui/**/*"
-	],
-	"files.associations": {
-		"*.txt": "markdown"
-	}
+  "editor.fontSize": 13,
+  "editor.fontFamily": "Consolas,'Courier New',monospace",
+  "terminal.integrated.fontFamily": "MesloLGM Nerd Font",
+  "terminal.integrated.fontSize": 12,
+  // 📝powershelel配置
+  "terminal.integrated.profiles.windows": {
+    "pwsh": {
+      "path": "c:/scoop/shims/pwsh.exe",
+      "args": [],
+      "icon": "terminal-powershell"
+    },
+    "nu": {
+      "path": "c:/scoop/shims/nu.exe",
+      "args": []
+    }
+  },
+  "window.commandCenter": false,
+  "git.autofetch": true,
+  "terminal.integrated.defaultProfile.windows": "nu",
+  "terminal.integrated.automationProfile.windows": {
+    "path": "c:/scoop/shims/pwsh.exe",
+    "args": []
+  },
+  // 终端日志级别
+  "terminal.integrated.enablePersistentSessions": true,
+  "terminal.integrated.showExitAlert": true,
+  // 📝ruff
+  "ruff.fixAll": true,
+  "[python]": {
+    // 📝yapf配置(格式化工具)
+    // "editor.defaultFormatter": "eeyore.yapf",
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit", // 保存时自动修复可修复的 lint 错误
+      "source.organizeImports.ruff": "explicit" // 保存时自动排序 import 语句
+    }
+  },
+  "python.analysis.typeCheckingMode": "standard",
+  "python.envFile": "${workspaceFolder}/.env",
+  "terminal.integrated.env.windows": {
+    "PYTHONPATH": "${workspaceFolder}"
+  },
+  "terminal.integrated.env.linux": {
+    "PYTHONPATH": "${workspaceFolder}"
+  },
+  "terminal.integrated.env.osx": {
+    "PYTHONPATH": "${workspaceFolder}"
+  },
+  // 📝jupyter.notebook
+  "jupyter.notebookFileRoot": "${workspaceFolder}", // 📌
+  "notebook.defaultFormatter": "charliermarsh.ruff",
+  "notebook.formatOnSave.enabled": true, // notebook 保存时自动格式化
+  "notebook.output.textLineLimit": 18,
+  "notebook.codeActionsOnSave": {
+    "notebook.source.fixAll": "explicit", // notebook 保存时自动修复可修复的 lint 错误
+    "notebook.source.organizeImports": "explicit" // notebook 保存时自动排序 import 语句
+  },
+  "editor.formatOnSave": true, // 保存时格式化
+  "prettier.configPath": ".vscode/.prettierrc.yaml",
+  "prettier.ignorePath": ".vscode/.prettierignore",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[xml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": false
+  },
+  "[svg]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": false
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[shellscript]": {
+    "editor.defaultFormatter": "lumirelle.shell-format-rev"
+  },
+  "[dockerfile]": {
+    "editor.defaultFormatter": "lumirelle.shell-format-rev"
+  },
+  "[ignore]": {
+    "editor.defaultFormatter": "lumirelle.shell-format-rev"
+  },
+  "[dotenv]": {
+    "editor.defaultFormatter": "lumirelle.shell-format-rev"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "[nushell]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // 📝彩虹缩进 indent-rainbow 配置
+  "editor.tabSize": 2,
+  "indentRainbow.ignoreErrorLanguages": ["plaintext"],
+  "indentRainbow.includedLanguages": [
+    "plaintext",
+    "javascript",
+    "typescript",
+    "typescriptreact",
+    "json",
+    "yaml",
+    "xml",
+    "dockerfile",
+    "shellscript",
+    "markdown",
+    "python",
+    "html",
+    "css",
+    "toml",
+    "sql",
+    "go",
+    "lua",
+    "nginx",
+    "nushell",
+    "dotenv"
+  ],
+  "indentRainbow.excludedLanguages": [],
+  // 📝code-runner
+  "code-runner.clearPreviousOutput": true,
+  "code-runner.executorMap": {
+    "python": "set PYTHONPATH=. && set PYTHONIOENCODING=utf-8 && $pythonPath $fullFileName",
+    "typescript": "node --loader ts-node/esm --disable-warning=ExperimentalWarning"
+  },
+  "json.format.enable": true,
+  "workbench.iconTheme": "vscode-icons",
+  "workbench.colorTheme": "GitHub Dark Colorblind (Beta)",
+  "terminal.integrated.enableMultiLinePasteWarning": "auto",
+  // 📝vscode自带css规则配置
+  "css.validate": true,
+  "css.lint.unknownAtRules": "ignore", // 忽略未知的 @ 规则
+  "css.lint.unknownProperties": "warning", // 对未知的属性发出警告
+  "css.lint.vendorPrefix": "warning", // 对供应商前缀发出警告
+  "css.lint.duplicateProperties": "error", // 对重复的属性发出错误
+  "css.lint.emptyRules": "warning",
+  "tailwindCSS.files.exclude": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/.hg/**",
+    "**/.svn/**",
+    "**/src/components/ui/**/*"
+  ],
+  "files.associations": {
+    ".prettierrc": "json",
+    "*.txt": "markdown",
+    ".nginx": "nginx",
+    "*.svg": "xml",
+    "*.sh": "shellscript",
+    "*.conf": "ini",
+    "*.nu": "nushell"
+  }
 }

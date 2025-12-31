@@ -1,32 +1,34 @@
 {
-	"recommendations": [
-		// python
-		"ms-python.python",
-		"ms-python.vscode-pylance",
-		"charliermarsh.ruff",
-		"ms-toolsai.jupyter",
-		"njpwerner.autodocstring",
-		// 通用
-		"esbenp.prettier-vscode",
-		"TheNuProjectContributors.vscode-nushell-lang",
-		// 美化
-		"oderwat.indent-rainbow",
-		"mechatroner.rainbow-csv",
-		"janisdd.vscode-edit-csv",
-		"liviuschera.noctis",
-		"GitHub.github-vscode-theme",
-		"ahmadawais.shades-of-purple",
-		// 工具
-		"vscode-icons-team.vscode-icons",
-		"alefragnani.project-manager",
-		"Gruntfuggly.todo-tree",
-		"mhutchie.git-graph",
-		"adamhartford.vscode-base64",
-		"formulahendry.code-runner",
-		// react
-		"bradlc.vscode-tailwindcss",
-		"dbaeumer.vscode-eslint",
-		"burkeholland.simple-react-snippets",
-		"midudev.better-svg"
-	]
+  "recommendations": [
+    // python
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "ms-toolsai.jupyter",
+    "njpwerner.autodocstring",
+    // 通用
+    "esbenp.prettier-vscode",
+    "TheNuProjectContributors.vscode-nushell-lang",
+    // 美化
+    "oderwat.indent-rainbow",
+    "mechatroner.rainbow-csv",
+    "janisdd.vscode-edit-csv",
+    "liviuschera.noctis",
+    "GitHub.github-vscode-theme",
+    "ahmadawais.shades-of-purple",
+    // 工具
+    "vscode-icons-team.vscode-icons",
+    "alefragnani.project-manager",
+    "Gruntfuggly.todo-tree",
+    "mhutchie.git-graph",
+    "adamhartford.vscode-base64",
+    "formulahendry.code-runner",
+    "ahmadalli.vscode-nginx-conf",
+    "lumirelle.shell-format-rev",
+    // react
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "burkeholland.simple-react-snippets",
+    "midudev.better-svg"
+  ]
 }
