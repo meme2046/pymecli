@@ -12,7 +12,9 @@ class Settings(BaseSettings):
     # API配置
     API_V1_STR: str = "/api/v1"
     NAME: str = metadata["Name"]
-    DESCRIPTION: str = f"{metadata['Summary']}, FastAPI提供[onnx-paddleocr识别、douzero、clash订阅转换]"
+    DESCRIPTION: str = (
+        f"{metadata['Summary']}, FastAPI提供: clash订阅转换、baidu.gushitong api"
+    )
     VERSION: str = metadata["Version"]
 
     print(f"project: {NAME}")

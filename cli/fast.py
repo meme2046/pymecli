@@ -1,5 +1,3 @@
-import os
-
 import typer
 import uvicorn
 from fastapi import FastAPI
@@ -11,17 +9,10 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from api.v1 import api_router
 from core.clash import ClashConfig, init_generator
 from core.config import settings
-from data.dou_dict import model_path_map
-from douzero import LandlordModel
 from models.response import SuccessResponse
 
 typer_app = typer.Typer()
 
-
-model_path = model_path_map["landlord"]
-if not os.path.exists(model_path):
-    raise Exception("模型文件不存在")
-LandlordModel.init_model(model_path)
 
 app = FastAPI(
     title=settings.NAME,
