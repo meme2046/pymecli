@@ -154,8 +154,6 @@ def run_app(
         help="服务器代理,传入则通过代理转换Clash订阅,比如:socks5://127.0.0.1:7890",
     ),
 ):
-    settings.reload()
-
     clash_config = ClashConfig(rule, my_rule, proxy)
     init_generator(clash_config)
 

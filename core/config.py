@@ -1,14 +1,12 @@
 import importlib.metadata
 
-from pydantic_settings import BaseSettings
-
 metadata = importlib.metadata.metadata("pymecli")
 # module_dir = Path(__file__).resolve().parent.parent
 
 # project = read_toml(str(module_dir / "./pyproject.toml"))["project"]
 
 
-class Settings(BaseSettings):
+class Settings:
     # API配置
     API_V1_STR: str = "/api/v1"
     NAME: str = metadata["Name"]
@@ -20,15 +18,6 @@ class Settings(BaseSettings):
     print(f"project: {NAME}")
     print(f"version: {VERSION}")
     print(f"description: {DESCRIPTION}")
-
-    class Config:
-        env_prefix = "PY_ME_CLI_"  # 添加环境变量前缀
-        case_sensitive = True
-
-    def reload(self):
-        new_settings = Settings()
-        for field in Settings.model_fields:
-            setattr(self, field, getattr(new_settings, field))
 
 
 settings = Settings()
