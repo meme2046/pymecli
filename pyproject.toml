@@ -22,13 +22,13 @@
     "toml>=0.10.2",
     "typer>=0.20.1",
     "uvicorn>=0.40.0",
-]
+  ]
   description = "My CLI"
   license = { text = "MIT" }
   name = "pymecli"
   readme = "README.md"
-  requires-python = ">=3.10,<=3.12"
-  version = "0.2.5"
+  requires-python = ">=3.10"
+  version = "0.2.6"
 
 [project.urls]
   Homepage = "https://pypi.org/project/pymecli"
