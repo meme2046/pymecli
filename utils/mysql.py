@@ -10,11 +10,11 @@ from utils.pd import deduplicated
 def get_database_engine(env_path: str) -> Engine:
     """创建数据库引擎"""
     load_dotenv(env_path)
-    host = os.getenv("UNI_CLI_MYSQL_HOST")
-    port = os.getenv("UNI_CLI_MYSQL_PORT")
-    user = os.getenv("UNI_CLI_MYSQL_USER")
-    password = os.getenv("UNI_CLI_MYSQL_PASSWORD")
-    database = os.getenv("UNI_CLI_MYSQL_DATABASE")
+    host = os.getenv("MYSQL_HOST")
+    port = os.getenv("MYSQL_PORT")
+    database = os.getenv("MYSQL_DATABASE")
+    user = os.getenv("MYSQL_USER")
+    password = os.getenv("MYSQL_PASSWORD")
 
     engine = create_engine(
         f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
