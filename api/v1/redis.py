@@ -17,35 +17,12 @@ async def json_by_key(
     request: Request,
     key: str = Query(..., description="redis.key"),
 ):
-    value = await request.app.state.redis_client.get(key)
-
-    if value is None:
-        raise HTTPException(status_code=404, detail=f"Key '{key}' not found in Redis")
-
-    json_data = json.loads(value)
-
-    return SuccessResponse(data=json_data)
-
-
-@router.get(
-    "/plaintext",
-    summary="根据redis.key获取数据",
-    response_description="返回plaintext数据",
-    # response_class=PlainTextResponse,
-)
-async def plaintext_by_key(
-    request: Request,
-    key: str = Query(..., description="redis.key"),
-):
     r = request.app.state.redis_client
     key_type = await r.type(key)
-    print(f"Key type: {key_type}")
 
     if key_type == "string":  # 或 'string' 取决于客户端
         value = await r.get(key)
-        return PlainTextResponse(
-            content=value, headers={"Content-Type": "text/plain; charset=utf-8"}
-        )
+        value = json.loads(value)
     elif key_type == "hash":
         value = await r.hgetall(key)
     elif key_type == "list":
@@ -61,10 +38,35 @@ async def plaintext_by_key(
 
 
 @router.get(
+    "/plaintext",
+    summary="根据redis.key获取数据",
+    response_description="返回plaintext数据",
+    # response_class=PlainTextResponse,
+)
+async def plaintext_by_key(
+    request: Request,
+    key: str = Query(..., description="redis.key"),
+):
+    r = request.app.state.redis_client
+    key_type = await r.type(key)
+    # print(f"Key type: {key_type}")
+
+    if key_type == "string":  # 或 'string' 取决于客户端
+        value = await r.get(key)
+        return PlainTextResponse(
+            content=value, headers={"Content-Type": "text/plain; charset=utf-8"}
+        )
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"key:<{key}>,value type not string"
+        )
+
+
+@router.get(
     "/byset",
     summary="根据redis.key获取数据",
 )
-async def plaintext_by_set(
+async def list_by_set(
     request: Request,
     key: str = Query(..., description="redis.key"),
     cursor: int = Query(0, description="从第几条开始取数据"),
