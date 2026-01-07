@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
         max_connections=20,  # 根据需要调整最大连接数
         decode_responses=True,
     )
-    redis_client = redis.Redis(connection_pool=redis_pool)
+    redis_client: redis.Redis = redis.Redis(connection_pool=redis_pool)
 
     # 启动时
     app.state.redis_client = redis_client

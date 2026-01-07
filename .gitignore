@@ -9,6 +9,7 @@ wheels/
 # Virtual environments
 .venv
 
+tmp/
 node_modules/
 pnpm-lock.yaml
 tmp.json

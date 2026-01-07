@@ -3,7 +3,7 @@ from decimal import Decimal
 import requests
 from sqlalchemy import Engine
 
-from utils.mysql import mysql_to_csv
+from utils.mysql import mysql_to_csv, mysql_to_redis
 
 
 def tickers(url: str, symbols: list, proxy: str | None = None):
@@ -44,6 +44,30 @@ def mix_tickers(symbols: list, proxy: str | None = None):
 def spot_tickers(symbols: list, proxy: str | None = None):
     url = "https://api.bitget.com/api/v2/spot/market/tickers"
     tickers(url, symbols, proxy)
+
+
+async def bitget_sf_redis_open(engine: Engine, key_prefix: str):
+    query = "select * from bitget_sf where spot_open_usdt is not null and futures_open_usdt is not null and pnl is null and up_status = 0 and deleted_at is null;"
+    row_count = await mysql_to_redis(
+        engine,
+        key_prefix,
+        "bitget_sf",
+        query,
+        update_status=1,
+        d_column_names=["spot_order_id", "futures_order_id"],
+        pd_dtype={
+            "spot_order_id": str,
+            "futures_order_id": str,
+            "spot_tracking_no": str,
+            "futures_tracking_no": str,
+            "open_at": "datetime64[ns]",
+            "close_at": "datetime64[ns]",
+            "spot_close_at": "datetime64[ns]",
+            "futures_close_at": "datetime64[ns]",
+        },
+    )
+
+    print(f"🚀 bitget sf open count:({row_count})")
 
 
 def bitget_sf_open(engine: Engine, csv_path: str):

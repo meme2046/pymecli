@@ -1,3 +1,5 @@
+import time
+
 import yaml
 
 
@@ -9,4 +11,4 @@ def read_yaml(fp_path):
 
 
 if __name__ == "__main__":
-    pass
+    print(time.time())
