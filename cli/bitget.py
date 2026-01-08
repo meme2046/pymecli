@@ -3,11 +3,12 @@ import asyncio
 import typer
 
 from crypto.bitget import (
-    bitget_sf_close,
-    bitget_sf_open,
+    bitget_sf_redis_close,
     bitget_sf_redis_open,
     grid_close,
     grid_open,
+    grid_redis_close,
+    grid_redis_open,
     mix_tickers,
     spot_tickers,
 )
@@ -22,15 +23,18 @@ def sync(env_path: str = "d:/.env"):
     engine = get_database_engine(env_path)
     grid_open(engine, "d:/github/meme2046/data/bitget_0.csv")
     grid_close(engine, "d:/github/meme2046/data/bitget_0.csv")
-    bitget_sf_open(engine, "d:/github/meme2046/data/bitget_sf_0.csv")
-    bitget_sf_close(engine, "d:/github/meme2046/data/bitget_sf_0.csv")
+    # bitget_sf_open(engine, "d:/github/meme2046/data/bitget_sf_0.csv")
+    # bitget_sf_close(engine, "d:/github/meme2046/data/bitget_sf_0.csv")
 
 
 @app.command()
 def rsync(env_path: str = "d:/.env"):
     """同步mysql中grid数据到csv文件"""
     engine = get_database_engine(env_path)
-    asyncio.run(bitget_sf_redis_open(engine, "bitget_sf"))
+    asyncio.run(grid_redis_open(engine))
+    asyncio.run(grid_redis_close(engine))
+    asyncio.run(bitget_sf_redis_open(engine))
+    asyncio.run(bitget_sf_redis_close(engine))
 
 
 @app.command()

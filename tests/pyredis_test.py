@@ -34,7 +34,6 @@ async def csv_to_redis(
             count += 1
 
         await pipe.execute()
-        await pipe.close()
         print(f"总共写入 {count} 条")
 
 

@@ -56,9 +56,11 @@ async def plaintext_by_key(
         return PlainTextResponse(
             content=value, headers={"Content-Type": "text/plain; charset=utf-8"}
         )
+    elif key_type == "none":
+        raise HTTPException(status_code=404, detail=f"Key '{key}' not found in Redis")
     else:
         raise HTTPException(
-            status_code=404, detail=f"key:<{key}>,value type not string"
+            status_code=400, detail=f"key:<{key}>,value type not string"
         )
 
 
@@ -74,10 +76,13 @@ async def list_by_set(
 ):
     r = request.app.state.redis_client
     key_type = await r.type(f"by_time_{key}")
-    print(f"Key type: {key_type}")
+
+    if key_type == "none":
+        raise HTTPException(status_code=404, detail=f"Key '{key}' not found in Redis")
+
     if key_type not in ["zset", "set"]:
         raise HTTPException(
-            status_code=404, detail=f"key:<{key}> type not in [zset,set]"
+            status_code=400, detail=f"key:<{key}>,value type not in [zset,set]"
         )
 
     ids = await r.zrevrange(f"by_time_{key}", cursor, n - 1)

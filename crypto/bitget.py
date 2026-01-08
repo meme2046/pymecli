@@ -46,12 +46,15 @@ def spot_tickers(symbols: list, proxy: str | None = None):
     tickers(url, symbols, proxy)
 
 
-async def bitget_sf_redis_open(engine: Engine, key_prefix: str):
+async def bitget_sf_redis_open(engine: Engine):
     query = "select * from bitget_sf where spot_open_usdt is not null and futures_open_usdt is not null and pnl is null and up_status = 0 and deleted_at is null;"
+    key_prefix = "bitget_sf"
+    table = "bitget_sf"
+
     row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        "bitget_sf",
+        table,
         query,
         update_status=1,
         d_column_names=["spot_order_id", "futures_order_id"],
@@ -68,6 +71,33 @@ async def bitget_sf_redis_open(engine: Engine, key_prefix: str):
     )
 
     print(f"🚀 bitget sf open count:({row_count})")
+
+
+async def bitget_sf_redis_close(engine: Engine):
+    query = "select * from bitget_sf where pnl is not null and up_status in (0,1);"
+    key_prefix = "bitget_sf"
+    table = "bitget_sf"
+
+    row_count = await mysql_to_redis(
+        engine,
+        key_prefix,
+        table,
+        query,
+        update_status=2,
+        d_column_names=["spot_order_id", "futures_order_id"],
+        pd_dtype={
+            "spot_order_id": str,
+            "futures_order_id": str,
+            "spot_tracking_no": str,
+            "futures_tracking_no": str,
+            "open_at": "datetime64[ns]",
+            "close_at": "datetime64[ns]",
+            "spot_close_at": "datetime64[ns]",
+            "futures_close_at": "datetime64[ns]",
+        },
+    )
+
+    print(f"🚀 bitget sf close count:({row_count})")
 
 
 def bitget_sf_open(engine: Engine, csv_path: str):
@@ -108,6 +138,52 @@ def bitget_sf_close(engine: Engine, csv_path: str):
     )
 
     print(f"🚀 bitget sf close count:({row_count})")
+
+
+async def grid_redis_open(engine: Engine):
+    query = "select * from bitget where ((cost is not null or benefit is not null) and profit is null) and up_status = 0 and order_id is not null and deleted_at is null;"
+    key_prefix = "bitget_grid"
+    table = "bitget"
+
+    row_count = await mysql_to_redis(
+        engine,
+        key_prefix,
+        table,
+        query,
+        update_status=1,
+        d_column_names=["order_id", "client_order_id"],
+        pd_dtype={
+            "order_id": str,
+            "fx_order_id": str,
+            "open_at": "datetime64[ns]",
+            "close_at": "datetime64[ns]",
+        },
+    )
+
+    print(f"🧮 bitget open count:({row_count})")
+
+
+async def grid_redis_close(engine: Engine):
+    query = "select * from bitget where profit is not null and up_status in (0,1) and deleted_at is null;"
+    key_prefix = "bitget_grid"
+    table = "bitget"
+
+    row_count = await mysql_to_redis(
+        engine,
+        key_prefix,
+        table,
+        query,
+        update_status=2,
+        d_column_names=["order_id", "client_order_id"],
+        pd_dtype={
+            "order_id": str,
+            "fx_order_id": str,
+            "open_at": "datetime64[ns]",
+            "close_at": "datetime64[ns]",
+        },
+    )
+
+    print(f"🧮 bitget close count:({row_count})")
 
 
 def grid_open(engine: Engine, csv_path: str):
