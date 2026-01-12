@@ -1,5 +1,6 @@
 import asyncio
 import csv
+import logging
 import os
 import time
 from typing import Any, List
@@ -7,12 +8,15 @@ from typing import Any, List
 import pandas as pd
 import typer
 
+from utils.logger import get_logger
+from utils.path import gen_fp_with_suffix
 from utils.pd import dt_to_timestamp
 from utils.pyredis import get_redis_client
 
 app = typer.Typer()
 
 r = get_redis_client()
+logger = get_logger(__name__, level=logging.INFO)
 
 
 async def csv_to_redis(
@@ -41,7 +45,7 @@ async def csv_to_redis(
             count += 1
 
         await pipe.execute()
-        print(f"总共写入 {count} 条")
+        logger.info(f"写入『{count}』条")
 
 
 async def csv_pd_redis(
@@ -55,26 +59,32 @@ async def csv_pd_redis(
             fp,
             encoding="utf-8",
             dtype={
+                "order_id": str,
+                "fx_order_id": str,
                 "spot_order_id": str,
                 "futures_order_id": str,
                 "spot_tracking_no": str,
                 "futures_tracking_no": str,
+                "open_at": str,
+                "close_at": str,
+                "spot_close_at": str,
+                "futures_close_at": str,
             },
         )
 
         # 如果open_at 为空，则设置为 created_at
-        df["open_at"] = df["open_at"].fillna(df["created_at"])
+        # df["open_at"] = df["open_at"].fillna(df["created_at"])
         del_column_names = ["created_at", "updated_at", "deleted_at"]
         # 只删除存在的列
         columns_to_drop = [col for col in del_column_names if col in df.columns]
         df = df.drop(columns=columns_to_drop)
 
-        datetime_cols = ["open_at", "close_at", "spot_close_at", "futures_close_at"]
-        for col in datetime_cols:
-            if col in df.columns:
-                # 处理不同的日期时间格式，使用 format='mixed' 让 pandas 自动推断格式
-                df[col] = pd.to_datetime(df[col], format="mixed")
-                df[col] = dt_to_timestamp(df[col])
+        # datetime_cols = ["open_at", "close_at", "spot_close_at", "futures_close_at"]
+        # for col in datetime_cols:
+        #     if col in df.columns:
+        #         # 处理不同的日期时间格式，使用 format='mixed' 让 pandas 自动推断格式
+        #         df[col] = pd.to_datetime(df[col], format="mixed")
+        #         df[col] = dt_to_timestamp(df[col])
 
         r = get_redis_client()
         pipe = r.pipeline()  # 启用 pipeline
@@ -98,7 +108,7 @@ async def csv_pd_redis(
             count += 1
 
         await pipe.execute()
-        print(f"🧱 to redis: {count}")
+        logger.info(f"🧱 to redis:『{count}』")
 
 
 async def get_latest_n(key_prefix="bitget_grid", n=5000) -> List[Any]:
@@ -113,7 +123,7 @@ async def get_latest_n(key_prefix="bitget_grid", n=5000) -> List[Any]:
 
 async def count_async(key_prefix="bitget_sf"):
     ids = await r.zrevrange(f"by_time:{key_prefix}", 0, -1)
-    print(f"记录数:『{len(ids)}』")
+    logger.info(f"记录数:『{len(ids)}』")
     # ⌞⌝ 『』
 
 
@@ -128,7 +138,7 @@ def count(
 
 
 @app.command()
-def c2r(
+def csv2redis(
     id1: str,
     id2: str,
     kp: str = typer.Option(
@@ -156,26 +166,55 @@ def c2r(
     )
 
 
-if __name__ == "__main__":
-    # csv_to_redis()
-    # main()
-    # asyncio.run(main("bitget_sf"))
-    # result = asyncio.run(main_test("test"))
-    # asyncio.run(
-    #     csv_to_redis(
-    #         key_prefix="bitget_sf",
-    #         fp="d:/github/meme2046/data/bitget_sf_0.csv",
-    #         id1="spot_order_id",
-    #         id2="futures_order_id",
-    #     )
-    # )
-    # asyncio.run(
-    #     csv_pd_redis(
-    #         key_prefix="bitget_sf",
-    #         fp="d:/github/meme2046/data/bitget_sf_0.csv",
-    #         id1="spot_order_id",
-    #         id2="futures_order_id",
-    #     )
-    # )
+@app.command()
+def convert(
+    fp: str = typer.Argument(
+        "d:/github/meme2046/data/deprecated/bitget_sf_0.csv",
+        help="csv文件路径",
+    ),
+):
+    # 转换csv文件,主要是将时间字符串转为时间戳,删除一些列
+    if not os.path.exists(fp):
+        logger.error(f"文件不存在:『{fp}』")
+        return
 
-    pass
+    df: pd.DataFrame = pd.read_csv(
+        fp,
+        encoding="utf-8",
+        dtype={
+            "order_id": str,
+            "fx_order_id": str,
+            "spot_order_id": str,
+            "futures_order_id": str,
+            "spot_tracking_no": str,
+            "futures_tracking_no": str,
+        },
+    )
+
+    df["open_at"] = df["open_at"].fillna(df["created_at"])
+    del_column_names = ["created_at", "updated_at", "deleted_at"]
+    columns_to_drop = [col for col in del_column_names if col in df.columns]
+    df = df.drop(columns=columns_to_drop)
+
+    datetime_cols = [
+        "created_at",
+        "open_at",
+        "close_at",
+        "spot_close_at",
+        "futures_close_at",
+    ]
+    for col in datetime_cols:
+        if col in df.columns:
+            # 处理不同的日期时间格式，使用 format='mixed' 让 pandas 自动推断格式
+            df[col] = pd.to_datetime(df[col], format="mixed")
+            df[col] = dt_to_timestamp(df[col])
+
+    out_fp = gen_fp_with_suffix(fp, "tmp")
+
+    df.to_csv(
+        out_fp,
+        mode="a",
+        header=not os.path.exists(out_fp),
+        index=False,
+        encoding="utf-8",
+    )

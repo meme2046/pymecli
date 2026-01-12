@@ -5,6 +5,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import Engine, create_engine, text
 
+from utils import logger
 from utils.pd import deduplicated, dt_to_timestamp
 from utils.pyredis import get_redis_client
 
@@ -26,7 +27,7 @@ def get_database_engine(env_path: str) -> Engine:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
     except Exception as e:
-        print(f"数据库连接失败: {str(e)}")
+        logger.error(f"数据库连接失败: {str(e)}")
         raise
 
     return engine
@@ -46,7 +47,7 @@ def mysql_to_csv(
     data_frame = pd.read_sql(query, engine, dtype=pd_dtype)
     # 提取 'id' 列
     ids = data_frame["id"].tolist()
-    # 删除 'id' 列
+    # 删除不需要的列
     data_frame = data_frame.drop(columns=del_column_names)
 
     # 根据 'open_at' 列降序排序
@@ -81,9 +82,10 @@ def mysql_to_csv(
     return 0
 
 
-async def mysql_to_redis(
+async def mysql_to_redis_and_csv(
     engine: Engine,
     key_prefix: str,
+    csv_fp: str,
     table: str,
     query: str,
     update_status: int,
@@ -96,27 +98,25 @@ async def mysql_to_redis(
     df["open_at"] = df["open_at"].fillna(df["created_at"])
     # 提取 'id' 列
     ids = df["id"].tolist()
-    # 删除 'id' 列
-    df = df.drop(columns=del_column_names)
+    # 删除不需要的列
+    columns_to_drop = [col for col in del_column_names if col in df.columns]
+    df = df.drop(columns=columns_to_drop)
 
     datetime_cols = ["open_at", "close_at", "spot_close_at", "futures_close_at"]
-    # 确保这些列是 datetime 类型（pandas 可能没自动识别）
+
+    logger.debug(df.head())
+    logger.debug(df.dtypes)
 
     for col in datetime_cols:
         if col in df.columns:
             df[col] = dt_to_timestamp(df[col])
             # df[col] = dt_to_timestamp(pd.to_datetime(df[col], errors="coerce"))
 
-    # 根据 'open_at' 列降序排序
-    # data_frame = data_frame.sort_values(by="open_at", ascending=False)
-
     # 数据写入redis
     r = get_redis_client()
     pipe = r.pipeline()  # 启用 pipeline
     count = 0
     n1, n2 = d_column_names
-
-    # print(df.dtypes)
 
     for _, row in df.iterrows():
         idx1 = row[n1]
@@ -132,11 +132,40 @@ async def mysql_to_redis(
         # 1. 写入完整数据到 Hash（自动覆盖）
         pipe.hset(key, mapping=row_dict)
         # 2. 写入 ZSet 索引：score = Unix 时间戳
-        pipe.zadd(f"by_time_{key_prefix}", {id: time.time()})
+        pipe.zadd(f"by_time:{key_prefix}", {id: time.time()})
         count += 1
 
     await pipe.execute()
-    print(f"🧱 to redis: {count}")
+    logger.debug(f"🧱 to redis: {count}")
+
+    df.to_csv(
+        csv_fp,
+        mode="a",
+        header=not os.path.exists(csv_fp),
+        index=False,
+        encoding="utf-8",
+    )
+
+    deduplicated(
+        csv_fp,
+        d_column_names,
+        "last",
+        pd_dtype={
+            "order_id": str,
+            "fx_order_id": str,
+            "spot_order_id": str,
+            "futures_order_id": str,
+            "spot_tracking_no": str,
+            "futures_tracking_no": str,
+            "open_at": str,
+            "close_at": str,
+            "spot_close_at": str,
+            "futures_close_at": str,
+        },
+    )
+
+    logger.debug(f"𝄜 to csv: {count}")
+
     # 根据提取的 'id' 列更新数据库中 up_status 字段
     if ids:
         # 使用 text() 构建查询时，确保 :ids 是一个列表

@@ -1,7 +1,9 @@
 import logging
 
 
-def get_logger(name, level=logging.DEBUG, fmt=logging.Formatter("%(message)s")):
+def get_logger(
+    name, level=logging.DEBUG, fmt=logging.Formatter("%(message)s")
+) -> logging.Logger:
     root_logger = logging.getLogger()
     root_level = root_logger.level if root_logger.level != 0 else logging.NOTSET
 

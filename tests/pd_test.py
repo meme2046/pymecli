@@ -5,12 +5,10 @@ from typing import cast
 import numpy as np
 import pandas as pd
 
+from utils import logger
 from utils.elapsed import timeit
-from utils.logger import get_logger
 from utils.mysql import get_database_engine
 from utils.pd import deduplicated
-
-logger = get_logger(__name__)
 
 
 @timeit
@@ -130,6 +128,7 @@ def pd_db_str(
     return df
 
 
+@timeit
 def test():
     columns = ["buy_px", "sell_px"]
     dtype = {col: str for col in columns}
@@ -137,8 +136,10 @@ def test():
 
 
 if __name__ == "__main__":
-    gate_0_fp = "d:/github/meme2046/data/gate_0.csv"
-    bitget_0_fp = "d:/github/meme2046/data/bitget_0.csv"
-    bitget_0_fp_0 = "d:/github/meme2046/data/bitget_0_c.csv"
+    # gate_0_fp = "d:/github/meme2046/data/gate_0.csv"
+    # bitget_0_fp = "d:/github/meme2046/data/bitget_0.csv"
+    # bitget_0_fp_0 = "d:/github/meme2046/data/bitget_0_c.csv"
     # pd_str(gate_0_fp, ["fx_order_id"])
-    pd_db_str(bitget_0_fp, "d:/.env", "bitget", "buy_px")
+    # pd_db_str(bitget_0_fp, "d:/.env", "bitget", "buy_px")
+    # logger.info("main")
+    test()
