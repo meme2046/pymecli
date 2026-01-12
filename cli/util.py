@@ -50,6 +50,28 @@ def v():
     print(f"🧊 python:{sys.version}")
 
 
+@app.command()
+def emoji():
+    """
+    打印自己常用的『emoji』符号
+    """
+    emoji_list = [
+        "『",
+        "』",
+        "✔",
+        "✘",
+        "❗",
+        "⭕",
+        "❓",
+        "⇡",
+        "⇣",
+        "⤶",
+        "￫",
+        "╰›",
+    ]
+    print(emoji_list)
+
+
 def strf_time(zone: str):
     tz = pytz.timezone(zone)
     now = datetime.now(tz)
@@ -62,6 +84,9 @@ def strf_time(zone: str):
 
 @app.command()
 def st():
+    """
+    打印不同时区的时间
+    """
     t0 = strf_time("UTC")
     t1 = strf_time("America/New_York")
     t2 = strf_time("Asia/Shanghai")
