@@ -27,7 +27,7 @@
   name = "pymecli"
   readme = "README.md"
   requires-python = ">=3.10"
-  version = "0.2.8"
+  version = "0.2.9"
 
 [project.urls]
   Homepage = "https://pypi.org/project/pymecli"
@@ -40,7 +40,7 @@
   gate = "cli.gate:app"
   util = "cli.util:app"
   # 临时命令
-  redis = "cli.redis_csv:app"
+  rd = "cli.redis_csv:app"
 
 [tool.uv]
 [[tool.uv.index]]
