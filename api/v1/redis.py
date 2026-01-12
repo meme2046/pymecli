@@ -72,10 +72,10 @@ async def list_by_set(
     request: Request,
     key: str = Query(..., description="redis.key"),
     cursor: int = Query(0, description="从第几条开始取数据"),
-    n: int = Query(10000, description="取多少数据"),
+    size: int = Query(5000, description="取多少数据"),
 ):
     r = request.app.state.redis_client
-    key_type = await r.type(f"by_time_{key}")
+    key_type = await r.type(f"by_time:{key}")
 
     if key_type == "none":
         raise HTTPException(status_code=404, detail=f"Key '{key}' not found in Redis")
@@ -85,7 +85,7 @@ async def list_by_set(
             status_code=400, detail=f"key:<{key}>,value type not in [zset,set]"
         )
 
-    ids = await r.zrevrange(f"by_time_{key}", cursor, n - 1)
+    ids = await r.zrevrange(f"by_time:{key}", cursor, cursor + size - 1)
     if not ids:
         return SuccessResponse(data=[])
 

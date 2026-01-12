@@ -1,7 +1,7 @@
 {
   "editor.fontSize": 13,
   "editor.fontFamily": "Consolas,'Courier New',monospace",
-  "terminal.integrated.fontFamily": "MesloLGM Nerd Font",
+  "terminal.integrated.fontFamily": "FiraCode Nerd Font Mono",
   "terminal.integrated.fontSize": 12,
   // 📝powershelel配置
   "terminal.integrated.profiles.windows": {
@@ -92,6 +92,9 @@
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[dotenv]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "[shellscript]": {
     "editor.defaultFormatter": "lumirelle.shell-format-rev"
   },
@@ -99,9 +102,6 @@
     "editor.defaultFormatter": "lumirelle.shell-format-rev"
   },
   "[ignore]": {
-    "editor.defaultFormatter": "lumirelle.shell-format-rev"
-  },
-  "[dotenv]": {
     "editor.defaultFormatter": "lumirelle.shell-format-rev"
   },
   "[go]": {
@@ -167,6 +167,7 @@
     "*.svg": "xml",
     "*.sh": "shellscript",
     "*.conf": "ini",
-    "*.nu": "nushell"
+    "*.nu": "nushell",
+    "*.env": "dotenv"
   }
 }

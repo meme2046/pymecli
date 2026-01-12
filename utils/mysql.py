@@ -93,6 +93,7 @@ async def mysql_to_redis(
 ) -> int:
     # 查询数据
     df = pd.read_sql(query, engine, dtype=pd_dtype)
+    df["open_at"] = df["open_at"].fillna(df["created_at"])
     # 提取 'id' 列
     ids = df["id"].tolist()
     # 删除 'id' 列
