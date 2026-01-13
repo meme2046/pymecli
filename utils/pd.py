@@ -20,12 +20,12 @@ def deduplicated(
         return existing_df
 
 
-def dt_to_timestamp(dt_series):
+def dt_to_timestamp(dt_series, timezone="Asia/Shanghai"):
     """
     将 datetime64[ns] Series 转为秒级时间戳(int),NaT → None
     """
     # 转为 int64 纳秒，NaT 会变成 -9223372036854775808
-    nanos = dt_series.astype("int64")
+    nanos = dt_series.dt.tz_localize(timezone).astype("int64")
     # // 10**9 # 秒 seconds
     # // 10**6 # 毫秒 millis
     # // 10**3 # 微秒 micros

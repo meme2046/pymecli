@@ -8,7 +8,7 @@ import pandas as pd
 from utils import logger
 from utils.elapsed import timeit
 from utils.mysql import get_database_engine
-from utils.pd import deduplicated
+from utils.pd import deduplicated, dt_to_timestamp
 
 
 @timeit
@@ -135,6 +135,61 @@ def test():
     print(dtype)
 
 
+@timeit
+def datetime_test():
+    env_path = "d:/.env"
+    engine = get_database_engine(env_path)
+    query = "select * from gate where order_id = '988422516603'"
+
+    df = pd.read_sql(
+        query,
+        engine,
+        dtype={
+            "order_id": str,
+            "fx_order_id": str,
+            "created_at": "datetime64[ns]",
+            "open_at": "datetime64[ns]",
+            "close_at": "datetime64[ns]",
+        },
+    )
+
+    # 设置pandas显示选项
+    # pd.set_option("display.max_columns", None)  # 显示所有列
+    # pd.set_option("display.max_rows", 100)  # 最多显示100行
+    # pd.set_option("display.width", None)  # 不限制显示宽度
+    # pd.set_option("display.max_colwidth", 100)  # 列宽最大值
+    # pd.set_option("display.precision", 3)  # 数值精度
+
+    # logger.info(df)
+    # logger.info("\n%s", df.to_string())
+    # logger.info(df.dtypes)
+    # logger.info("\n%s", table_str)
+
+    datetime_cols = [
+        "created_at",
+        "open_at",
+        "close_at",
+    ]
+    for col in datetime_cols:
+        if col in df.columns:
+            # 处理不同的日期时间格式，使用 format='mixed' 让 pandas 自动推断格式
+            df[col] = pd.to_datetime(df[col], format="mixed")
+            df[col] = dt_to_timestamp(df[col])
+
+    logger.info(
+        df[["created_at", "open_at", "close_at"]].to_markdown(
+            tablefmt="simple",  # plain、simple、github、grid、fancy_grid、pipe、orgtbl、jira、html
+            index=False,
+            disable_numparse=True,
+            stralign="left",
+            numalign="left",
+        )
+    )
+
+    # logger.info(df.dtypes)
+    # logger.info("\n%s", table_str)
+
+
 if __name__ == "__main__":
     # gate_0_fp = "d:/github/meme2046/data/gate_0.csv"
     # bitget_0_fp = "d:/github/meme2046/data/bitget_0.csv"
@@ -142,4 +197,5 @@ if __name__ == "__main__":
     # pd_str(gate_0_fp, ["fx_order_id"])
     # pd_db_str(bitget_0_fp, "d:/.env", "bitget", "buy_px")
     # logger.info("main")
-    test()
+    datetime_test()
+    # pd_print_test()

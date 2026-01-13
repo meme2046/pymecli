@@ -20,7 +20,13 @@ def get_database_engine(env_path: str) -> Engine:
     password = os.getenv("MYSQL_PASSWORD")
 
     engine = create_engine(
-        f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
+        f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}",
+        connect_args={
+            # 对于MySQL，可以在连接参数中指定时区
+            # "init_command": "SET time_zone='+00:00'",  # UTC时间
+            # 或者使用本地时区，例如：
+            # "init_command": "SET time_zone='+08:00'",  # 中国标准时间
+        },
     )
 
     try:
