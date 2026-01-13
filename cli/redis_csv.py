@@ -134,6 +134,13 @@ def count(
         help="redis zset key前缀",
     ),
 ):
+    """
+    查询by_time:{key_prefix} redis zset中的记录数
+
+    :param key_prefix: 传入会自动组合为 by_time:{key_prefix}
+    :type key_prefix: str
+
+    """
     asyncio.run(count_async(key_prefix))
 
 
@@ -154,8 +161,18 @@ def csv2redis(
         help="csv文件路径",
     ),
 ):
-    # order_id client_order_id
-    # spot_order_id futures_order_id
+    """
+    csv -> redis
+
+    :param id1: id1的列名,会按照当前记录的id1、id2生成redis.key
+    :type id1: str
+    :param id2: id2的列名,会按照当前记录的id1、id2生成redis.key
+    :type id2: str
+    :param kp: 说明
+    :type kp: 写入redis的key_prefix
+    :param fp: 说明
+    :type fp: csv文件路径
+    """
     asyncio.run(
         csv_pd_redis(
             id1,
@@ -173,7 +190,13 @@ def convert(
         help="csv文件路径",
     ),
 ):
-    # 转换csv文件,主要是将时间字符串转为时间戳,删除一些列
+    """
+    csv -> csv
+    主要是将时间字符串转为时间戳,删除一些列
+
+    :param fp: csv文件路径
+    :type fp: str
+    """
     if not os.path.exists(fp):
         logger.error(f"文件不存在:『{fp}』")
         return
