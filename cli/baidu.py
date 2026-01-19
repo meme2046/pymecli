@@ -14,7 +14,7 @@ r = get_redis_client_sync()
 
 
 @app.command()
-def gushitong(
+def acsToken(
     url: str = typer.Argument(
         "https://gushitong.baidu.com/index/ab-000001?name=%25E4%25B8%258A%25E8%25AF%2581%25E6%258C%2587%25E6%2595%25B0",
         help="request url",
