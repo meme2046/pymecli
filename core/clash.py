@@ -100,7 +100,7 @@ class ClashYamlGenerator:
 
         # 获取rules
         rule_list = [
-            [f"{self.my_rule_base_url}/direct.yaml", "DIRECT"],
+            [f"{self.my_rule_base_url}/direct.yaml", "DIRECT,no-resolve"],
             [f"{self.my_rule_base_url}/proxy.yaml", "全局选择"],
             [
                 f"{self.my_rule_base_url}/round.yaml",

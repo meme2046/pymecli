@@ -57,58 +57,57 @@
     "notebook.source.fixAll": "explicit", // notebook 保存时自动修复可修复的 lint 错误
     "notebook.source.organizeImports": "explicit" // notebook 保存时自动排序 import 语句
   },
-  "editor.formatOnSave": true, // 保存时格式化
-  "prettier.configPath": ".vscode/.prettierrc.yaml",
-  "prettier.ignorePath": ".vscode/.prettierignore",
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        // prettier
+        "match": "\\.(txt|ts|js|jsx|tsx|json|html|css|graphql|gql|yaml|yml|md)$",
+        "notMatch": "node_modules/*$",
+        "isAsync": true,
+        "cmd": "me prettier ${file}"
+      },
+      {
+        // @prettier/plugin-xml
+        "match": "\\.(xml|svg)$",
+        "isAsync": true,
+        "cmd": "me prettier ${file}"
+      },
+      {
+        // prettier-plugin-toml
+        "match": "\\.(toml)$",
+        "isAsync": true,
+        "cmd": "me prettier ${file}"
+      },
+      {
+        // prettier-plugin-nginx
+        "match": "\\.(nginx)$",
+        "isAsync": true,
+        "cmd": "me prettier ${file}"
+      },
+      {
+        // prettier-plugin-sh
+        "match": "\\.(sh|env|Dockerfile|properties|gitignore|dockerignore|prettierignore)$",
+        "notMatch": "\\.(nu)$",
+        "isAsync": true,
+        "cmd": "me prettier ${file}"
+      },
+      {
+        // no-dot-ext
+        "match": "Dockerfile$",
+        "isAsync": true,
+        "cmd": "me prettier ${file}"
+      },
+      {
+        // nushell
+        "match": "\\.(nu)$",
+        "isAsync": true,
+        "cmd": "topiary format ${file}"
+      }
+    ]
   },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[yaml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[toml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[xml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": false
-  },
-  "[svg]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": false
-  },
-  "[markdown]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[dotenv]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[shellscript]": {
-    "editor.defaultFormatter": "lumirelle.shell-format-rev"
-  },
-  "[dockerfile]": {
-    "editor.defaultFormatter": "lumirelle.shell-format-rev"
-  },
-  "[ignore]": {
-    "editor.defaultFormatter": "lumirelle.shell-format-rev"
-  },
+  "editor.formatOnSave": false, // 保存时格式化
   "[go]": {
     "editor.defaultFormatter": "golang.go"
-  },
-  "[nushell]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   // 📝彩虹缩进 indent-rainbow 配置
   "editor.tabSize": 2,
@@ -144,7 +143,7 @@
   },
   "json.format.enable": true,
   "workbench.iconTheme": "vscode-icons",
-  "workbench.colorTheme": "GitHub Dark Colorblind (Beta)",
+  "workbench.colorTheme": "Noctis Sereno",
   "terminal.integrated.enableMultiLinePasteWarning": "auto",
   // 📝vscode自带css规则配置
   "css.validate": true,
@@ -168,6 +167,9 @@
     "*.sh": "shellscript",
     "*.conf": "ini",
     "*.nu": "nushell",
-    "*.env": "dotenv"
+    "*.env": "dotenv",
+    "*.xml": "xml",
+    "*.py": "python",
+    "*.toml": "toml"
   }
 }
