@@ -26,7 +26,7 @@ def acsToken(
         help="timeout内如果没有请求完整,会强制中断,然后从已有的请求中获取数据",
     ),
 ):
-    """通过selenium获取百度Acs-Token
+    """通过selenium获取百度股事通Acs-Token
 
     Args:
         url (str, optional): 请求的『URL』地址. Defaults to typer.Argument( "https://gushitong.baidu.com/", help="request url", ).
