@@ -30,7 +30,7 @@
   name = "pymecli"
   readme = "README.md"
   requires-python = ">=3.10"
-  version = "0.3.1"
+  version = "0.3.2"
 
 [project.urls]
   Homepage = "https://pypi.org/project/pymecli"
