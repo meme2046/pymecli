@@ -77,6 +77,10 @@ class ClashYamlGenerator:
                 userinfo = response.headers["Subscription-Userinfo"]
             remote_config = yaml.safe_load(response.text)
 
+            # 检查 remote_config 是否为 None
+            if remote_config is None:
+                raise ValueError("Invalid subscription content: empty or invalid YAML.")
+
             ps = remote_config.get("proxies", [])
             if not ps:
                 raise ValueError("No proxies found in subscription.")
@@ -218,7 +222,7 @@ class ClashYamlGenerator:
         return template, userinfo
 
     def query2sub(self, urls: str, agents: str, names: str):
-        url_list = urls.split(",") if urls else []
+        url_list = urls.split(",") if urls and urls.strip() else []
         agents_list = agents.split(",") if agents else []
         name_list = names.split(",") if names else []
 
