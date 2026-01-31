@@ -73,7 +73,7 @@ async def bitget_sf_open(engine: Engine, csv_fp: str):
         },
     )
 
-    logger.info(f"🚀 bitget sf open count:({row_count})")
+    logger.info(f"🚀 bitget SF open count:({row_count})")
 
 
 async def bitget_ff_open(engine: Engine, csv_fp: str):
@@ -102,7 +102,7 @@ async def bitget_ff_open(engine: Engine, csv_fp: str):
         },
     )
 
-    logger.info(f"💰 bitget ff open count:({row_count})")
+    logger.info(f"💰 bitget FF open count:({row_count})")
 
 
 async def bitget_sf_close(engine: Engine, csv_path: str):
@@ -131,7 +131,7 @@ async def bitget_sf_close(engine: Engine, csv_path: str):
         },
     )
 
-    logger.info(f"🚀 bitget sf close count:({row_count})")
+    logger.info(f"🚀 bitget SF close count:({row_count})")
 
 
 async def bitget_ff_close(engine: Engine, csv_path: str):
@@ -160,7 +160,7 @@ async def bitget_ff_close(engine: Engine, csv_path: str):
         },
     )
 
-    logger.info(f"💰 bitget sf close count:({row_count})")
+    logger.info(f"💰 bitget FF close count:({row_count})")
 
 
 async def grid_open(engine: Engine, csv_path: str):
