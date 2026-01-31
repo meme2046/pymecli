@@ -167,6 +167,12 @@ async def mysql_to_redis_and_csv(
             "close_at": str,
             "spot_close_at": str,
             "futures_close_at": str,
+            "long_order_id": str,
+            "short_order_id": str,
+            "long_tracking_no": str,
+            "short_tracking_no": str,
+            "long_close_at": str,
+            "short_close_at": str,
         },
     )
 

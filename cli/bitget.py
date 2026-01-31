@@ -3,6 +3,8 @@ import asyncio
 import typer
 
 from crypto.bitget import (
+    bitget_ff_close,
+    bitget_ff_open,
     bitget_sf_close,
     bitget_sf_open,
     grid_close,
@@ -21,10 +23,16 @@ def sync(env_path: str = "d:/.env"):
     engine = get_database_engine(env_path)
     grid_csv_fp = "d:/github/meme2046/data/bitget_grid_0.csv"
     sf_csv_fp = "d:/github/meme2046/data/bitget_sf_0.csv"
+    ff_csv_fp = "d:/github/meme2046/data/bitget_ff_0.csv"
+
     asyncio.run(grid_open(engine, grid_csv_fp))
     asyncio.run(grid_close(engine, grid_csv_fp))
+
     asyncio.run(bitget_sf_open(engine, sf_csv_fp))
     asyncio.run(bitget_sf_close(engine, sf_csv_fp))
+
+    asyncio.run(bitget_ff_open(engine, ff_csv_fp))
+    asyncio.run(bitget_ff_close(engine, ff_csv_fp))
 
 
 @app.command()
