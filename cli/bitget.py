@@ -5,6 +5,7 @@ import typer
 from crypto.bitget import (
     bitget_ff_close,
     bitget_ff_open,
+    bitget_ff_pending,
     bitget_sf_close,
     bitget_sf_open,
     grid_close,
@@ -32,6 +33,7 @@ def sync(env_path: str = "d:/.env"):
     asyncio.run(bitget_sf_close(engine, sf_csv_fp))
 
     asyncio.run(bitget_ff_open(engine, ff_csv_fp))
+    asyncio.run(bitget_ff_pending(engine, ff_csv_fp))
     asyncio.run(bitget_ff_close(engine, ff_csv_fp))
 
 

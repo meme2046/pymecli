@@ -134,10 +134,10 @@ async def bitget_sf_close(engine: Engine, csv_path: str):
     logger.info(f"🚀 bitget SF close count:({row_count})")
 
 
-async def bitget_ff_close(engine: Engine, csv_path: str):
+async def bitget_ff_pending(engine: Engine, csv_path: str):
     key_prefix = "bitget_ff"
     table = "bitget_ff"
-    query = f"select * from {table} where pnl is not null and up_status in (0,1);"
+    query = f"select * from {table} where pnl is null and (long_close_at is not null or short_close_at is not null) and up_status in (1);"
 
     row_count = await mysql_to_redis_and_csv(
         engine,
@@ -146,6 +146,35 @@ async def bitget_ff_close(engine: Engine, csv_path: str):
         table,
         query,
         update_status=2,
+        d_column_names=["long_order_id", "short_order_id"],
+        pd_dtype={
+            "long_order_id": str,
+            "short_order_id": str,
+            "long_tracking_no": str,
+            "short_tracking_no": str,
+            "created_at": "datetime64[ns]",
+            "open_at": "datetime64[ns]",
+            "close_at": "datetime64[ns]",
+            "long_close_at": "datetime64[ns]",
+            "short_close_at": "datetime64[ns]",
+        },
+    )
+
+    logger.info(f"💰 bitget FF pendding count:({row_count})")
+
+
+async def bitget_ff_close(engine: Engine, csv_path: str):
+    key_prefix = "bitget_ff"
+    table = "bitget_ff"
+    query = f"select * from {table} where pnl is not null and up_status in (0,1,2);"
+
+    row_count = await mysql_to_redis_and_csv(
+        engine,
+        key_prefix,
+        csv_path,
+        table,
+        query,
+        update_status=3,
         d_column_names=["long_order_id", "short_order_id"],
         pd_dtype={
             "long_order_id": str,

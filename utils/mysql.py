@@ -108,7 +108,14 @@ async def mysql_to_redis_and_csv(
     columns_to_drop = [col for col in del_column_names if col in df.columns]
     df = df.drop(columns=columns_to_drop)
 
-    datetime_cols = ["open_at", "close_at", "spot_close_at", "futures_close_at"]
+    datetime_cols = [
+        "open_at",
+        "close_at",
+        "spot_close_at",
+        "futures_close_at",
+        "long_close_at",
+        "short_close_at",
+    ]
 
     logger.debug(df.head())
     logger.debug(df.dtypes)
