@@ -160,7 +160,7 @@ async def bitget_ff_pending(engine: Engine, csv_path: str):
         },
     )
 
-    logger.info(f"💰 bitget FF pendding count:({row_count})")
+    logger.info(f"💰 bitget FF pending count:({row_count})")
 
 
 async def bitget_ff_close(engine: Engine, csv_path: str):
