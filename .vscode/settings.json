@@ -9,12 +9,12 @@
   // 📝powershelel配置
   "terminal.integrated.profiles.windows": {
     "pwsh": {
-      "path": "c:/scoop/shims/pwsh.exe",
+      "path": "c:/.scoop/shims/pwsh.exe",
       "args": [],
       "icon": "terminal-powershell"
     },
     "nu": {
-      "path": "c:/scoop/shims/nu.exe",
+      "path": "c:/.scoop/shims/nu.exe",
       "args": []
     }
   },
@@ -22,7 +22,7 @@
   "git.autofetch": true,
   "terminal.integrated.defaultProfile.windows": "nu",
   "terminal.integrated.automationProfile.windows": {
-    "path": "c:/scoop/shims/pwsh.exe",
+    "path": "c:/.scoop/shims/pwsh.exe",
     "args": []
   },
   // 终端日志级别

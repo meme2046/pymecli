@@ -1,4 +1,4 @@
-mixed-port: 7890
+mixed-port: 7897
 allow-lan: false
 mode: rule
 log-level: warning

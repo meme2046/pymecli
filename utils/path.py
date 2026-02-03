@@ -15,4 +15,4 @@ def gen_fp_with_suffix(fp: str, suffix: str):
 
 
 if __name__ == "__main__":
-    gen_fp_with_suffix("d:/github/meme2046/data/bitget_sf_0.csv", "tmp")
+    gen_fp_with_suffix("d:/.github/meme2046/data/bitget_sf_0.csv", "tmp")
