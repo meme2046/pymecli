@@ -19,9 +19,12 @@ app = typer.Typer()
 
 
 @app.command()
-def rsync(env_path: str = "d:/.env"):
+def rsync(
+    env_path: str = "d:/.env",
+    csv_dir: str = "d:/.github/meme2046/data",
+):
     """同步mysql中grid数据到csv文件"""
     engine = get_database_engine(env_path)
-    grid_csv_fp = "d:/.github/meme2046/data/gate_grid_0.csv"
+    grid_csv_fp = f"{csv_dir}/gate_grid_0.csv"
     asyncio.run(grid_open(engine, grid_csv_fp))
     asyncio.run(grid_close(engine, grid_csv_fp))

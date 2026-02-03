@@ -12,7 +12,3 @@ def gen_fp_with_suffix(fp: str, suffix: str):
 
     new_path = directory / f"{file_stem}_{suffix}{file_suffix}"
     return new_path
-
-
-if __name__ == "__main__":
-    gen_fp_with_suffix("d:/.github/meme2046/data/bitget_sf_0.csv", "tmp")
