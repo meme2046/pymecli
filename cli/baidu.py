@@ -20,7 +20,7 @@ def acsToken(
         help="request url",
     ),
     timeout: int = typer.Option(
-        3,
+        10,
         "--timeout",
         "-t",
         help="timeout内如果没有请求完整,会强制中断,然后从已有的请求中获取数据",
