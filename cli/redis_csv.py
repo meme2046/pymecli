@@ -21,7 +21,7 @@ logger = get_logger(__name__, level=logging.INFO)
 
 async def csv_to_redis(
     key_prefix: str = "bitget_grid",
-    fp: str = "d:/.github/meme2046/data/bitget_0.csv",
+    fp: str = "d:/github/meme2046/data/bitget_0.csv",
     id1="order_id",
     id2="client_order_id",
 ):
@@ -52,7 +52,7 @@ async def csv_pd_redis(
     id1="order_id",
     id2="client_order_id",
     key_prefix: str = "bitget_sf",
-    fp: str = "d:/.github/meme2046/data/bitget_sf_0.csv",
+    fp: str = "d:/github/meme2046/data/bitget_sf_0.csv",
 ):
     if os.path.exists(fp):
         df: pd.DataFrame = pd.read_csv(
@@ -155,7 +155,7 @@ def csv2redis(
         help="存入redis的key前缀",
     ),
     fp: str = typer.Option(
-        "d:/.github/meme2046/data/bitget_sf_0.csv",
+        "d:/github/meme2046/data/bitget_sf_0.csv",
         "--file-path",
         "-fp",
         help="csv文件路径",
@@ -186,7 +186,7 @@ def csv2redis(
 @app.command()
 def convert(
     fp: str = typer.Argument(
-        "d:/.github/meme2046/data/deprecated/bitget_sf_0.csv",
+        "d:/github/meme2046/data/deprecated/bitget_sf_0.csv",
         help="csv文件路径",
     ),
 ):

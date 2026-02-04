@@ -21,7 +21,7 @@ app = typer.Typer()
 @app.command()
 def sync(
     env_path: str = "d:/.env",
-    csv_dir: str = "d:/.github/meme2046/data",
+    csv_dir: str = "d:/github/meme2046/data",
 ):
     """同步mysql中grid数据到csv文件"""
     engine = get_database_engine(env_path)
