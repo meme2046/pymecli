@@ -6,17 +6,24 @@ app = typer.Typer()
 @app.command()
 def hello(
     name: str = typer.Argument(
-        "from My CLI!",
-        help="Name of the person to greet",
+        help="Person to say hello to",
+    ),
+    from_name: str = typer.Option(
+        "Pymecli",
+        "-f",
+        "--from",
+        help="Who is saying hello",
     ),
 ):
-    print(f"Hello {name}!")
+    if from_name != "":
+        print(f"Hello {name} from {from_name}!")
+    else:
+        print(f"Hello {name}!")
 
 
 @app.command()
 def goodbye(
     name: str = typer.Argument(
-        "from My CLI!",
         help="Name of the person to goodbye",
     ),
     formal: bool = typer.Option(
