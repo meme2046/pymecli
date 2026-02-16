@@ -104,11 +104,15 @@ class ClashYamlGenerator:
 
         # 获取rules
         rule_list = [
-            [f"{self.my_rule_base_url}/direct.yaml", "DIRECT,no-resolve"],
+            [f"{self.my_rule_base_url}/direct.yaml", "DIRECT"],
             [f"{self.my_rule_base_url}/proxy.yaml", "全局选择"],
             [
                 f"{self.my_rule_base_url}/round.yaml",
                 "轮询",
+            ],
+            [
+                f"{self.my_rule_base_url}/xbox.yaml",
+                "全局选择",
             ],
         ]
 
@@ -128,6 +132,7 @@ class ClashYamlGenerator:
             {
                 "applications": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "classical",
                     "url": f"{self.rule_base_url}/applications.txt",
                     "path": "./ruleset/applications.yaml",
@@ -135,6 +140,7 @@ class ClashYamlGenerator:
                 },
                 "private": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "domain",
                     "url": f"{self.rule_base_url}/private.txt",
                     "path": "./ruleset/private.yaml",
@@ -142,6 +148,7 @@ class ClashYamlGenerator:
                 },
                 "icloud": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "domain",
                     "url": f"{self.rule_base_url}/icloud.txt",
                     "path": "./ruleset/icloud.yaml",
@@ -149,6 +156,7 @@ class ClashYamlGenerator:
                 },
                 "apple": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "domain",
                     "url": f"{self.rule_base_url}/apple.txt",
                     "path": "./ruleset/apple.yaml",
@@ -156,6 +164,7 @@ class ClashYamlGenerator:
                 },
                 "google": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "domain",
                     "url": f"{self.rule_base_url}/google.txt",
                     "path": "./ruleset/google.yaml",
@@ -163,6 +172,7 @@ class ClashYamlGenerator:
                 },
                 "proxy": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "domain",
                     "url": f"{self.rule_base_url}/proxy.txt",
                     "path": "./ruleset/proxy.yaml",
@@ -170,6 +180,7 @@ class ClashYamlGenerator:
                 },
                 "direct": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "domain",
                     "url": f"{self.rule_base_url}/direct.txt",
                     "path": "./ruleset/direct.yaml",
@@ -177,6 +188,7 @@ class ClashYamlGenerator:
                 },
                 "lancidr": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "ipcidr",
                     "url": f"{self.rule_base_url}/lancidr.txt",
                     "path": "./ruleset/lancidr.yaml",
@@ -184,6 +196,7 @@ class ClashYamlGenerator:
                 },
                 "cncidr": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "ipcidr",
                     "url": f"{self.rule_base_url}/cncidr.txt",
                     "path": "./ruleset/cncidr.yaml",
@@ -191,6 +204,7 @@ class ClashYamlGenerator:
                 },
                 "telegramcidr": {
                     "type": "http",
+                    "format": "yaml",
                     "behavior": "ipcidr",
                     "url": f"{self.rule_base_url}/telegramcidr.txt",
                     "path": "./ruleset/telegramcidr.yaml",
@@ -210,8 +224,8 @@ class ClashYamlGenerator:
                 "RULE-SET,google,全局选择",
                 "RULE-SET,proxy,全局选择",
                 "RULE-SET,direct,DIRECT",
-                "RULE-SET,lancidr,DIRECT",
-                "RULE-SET,cncidr,DIRECT",
+                "RULE-SET,lancidr,DIRECT,no-resolve",
+                "RULE-SET,cncidr,DIRECT,no-resolve",
                 "RULE-SET,telegramcidr,全局选择",
                 "GEOIP,LAN,DIRECT,no-resolve",
                 "GEOIP,CN,DIRECT,no-resolve",
