@@ -44,7 +44,7 @@ def sync(
 def spot(
     symbols: str,
     proxy: str = typer.Option(
-        None, "--proxy", "-p", help="代理服务器地址，例如: http://127.0.0.1:7890"
+        None, "--proxy", "-p", help="代理服务器地址，例如: http://127.0.0.1:7897"
     ),
 ):
     """
@@ -60,7 +60,7 @@ def spot(
 def mix(
     symbols: str,
     proxy: str = typer.Option(
-        None, "--proxy", "-p", help="代理服务器地址，例如: http://127.0.0.1:7890"
+        None, "--proxy", "-p", help="代理服务器地址，例如: http://127.0.0.1:7897"
     ),
 ):
     """

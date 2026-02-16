@@ -9,14 +9,14 @@ if __name__ == "__main__":
             "name": "狗狗加速",
             "url": "url1",
             "user_agent": "clash-verge/v2.4.3",
-            "proxy": "http://127.0.0.1:7890",
+            "proxy": "http://127.0.0.1:7897",
             "rule_base_url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release",
         },
         {
             "name": "Rancho",
             "url": "url2",
             "user_agent": "clash-verge/v2.4.3",
-            "proxy": "http://127.0.0.1:7890",
+            "proxy": "http://127.0.0.1:7897",
             "rule_base_url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release",
         },
     ]
