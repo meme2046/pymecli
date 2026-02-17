@@ -17,93 +17,46 @@ dns:
   fake-ip-range: "198.18.0.1/16"
   fake-ip-filter-mode: "blacklist"
   prefer-h3: false
-  respect-rules: false
-  use-hosts: false
-  use-system-hosts: false
-  ipv6: false
-  cache-algorithm: arc
+  respect-rules: false # 是否让 DNS 解析遵循路由规则
+  use-hosts: true # 启用本地 hosts
+  use-system-hosts: true # 启用系统 hosts
+  ipv6: true # 禁用 IPv6 DNS 解析
   fake-ip-filter:
     - "*.lan"
     - "*.local"
     - "*.arpa"
-    - "*.time.*"
-    - "*.ntp.*"
-    - "*.music.*"
-    - "*.msftncsi.com"
-    - "*.msftconnecttest.com"
+    - "time.*.com"
+    - "ntp.*.com"
+    - "time.*.com"
     - "+.market.xiaomi.com"
     - "localhost.ptlogin2.qq.com"
-    - "stun.*"
-    - "*.srv.nintendo.net"
-    - "*.stun.playstation.net"
-    - "xbox.*.microsoft.com"
-    - "*.ipv6.microsoft.com"
-    - "*.xboxlive.com"
-    - "speedtest.cros.wr.pvp.net"
+    - "*.msftncsi.com"
+    - "www.msftconnecttest.com"
   default-nameserver:
-    - "223.5.5.5"
-    - "119.29.29.29"
-    - "1.1.1.1"
-    - "8.8.8.8"
-    - "2400:3200::1"
-    - "2001:4860:4860::8888"
+    - "223.5.5.5" # 阿里云 DNS（国内）
+    - "8.8.8.8" # Google DNS（国外）
+    - "2400:3200::1" # 阿里云 IPv6 DNS
+    - "2001:4860:4860::8888" # Google IPv6 DNS
   nameserver:
-    # 国内DNS服务器↓
-    - "https://dns.alidns.com/dns-query" # 阿里云公共DNS
-    - "https://doh.pub/dns-query" # 腾讯DNSPod
-    - "https://doh.360.cn/dns-query" # 360安全DNS
-    - "https://1.1.1.1/dns-query" #  Cloudflare(主)
-    # 国外DNS服务器↓
-    - "https://1.0.0.1/dns-query" # Cloudflare(备)
-    - "https://208.67.222.222/dns-query" # OpenDNS(主)
-    - "https://208.67.220.220/dns-query" # OpenDNS(备)
-    - "https://194.242.2.2/dns-query" # Mullvad(主)
-    - "https://194.242.2.3/dns-query" # Mullvad(备)
-  direct-nameserver-follow-policy: false
+    - "8.8.8.8" # Google DNS（UDP 协议）
+    - "https://doh.pub/dns-query" # 公共 DoH DNS（加密解析，防污染）
+    - "https://dns.alidns.com/dns-query" # 阿里云 DoH DNS（国内稳定）
+  fallback: []
   fallback-filter:
     geoip: true
     geoip-code: "CN"
     ipcidr:
       - "240.0.0.0/4"
       - "0.0.0.0/32"
-      - "127.0.0.1/32"
-      - "192.168.0.0/16"
-      - "10.0.0.0/8"
-      - "172.16.0.0/12"
     domain:
       - "+.google.com"
       - "+.facebook.com"
-      - "+.twitter.com"
       - "+.youtube.com"
-      - "+.googleapis.com"
-      - "+.gvt1.com"
-  fallback: []
   proxy-server-nameserver:
-    # 国内DNS服务器↓
-    - "https://dns.alidns.com/dns-query" # 阿里云公共DNS
-    - "https://doh.pub/dns-query" # 腾讯DNSPod
-    - "https://doh.360.cn/dns-query" # 360安全DNS
-    # 国外DNS服务器↓
-    - "https://1.1.1.1/dns-query" # Cloudflare(主)
-    - "https://1.0.0.1/dns-query" # Cloudflare(备)
-    - "https://208.67.222.222/dns-query" # OpenDNS(主)
-    - "https://208.67.220.220/dns-query" # OpenDNS(备)
-    - "https://194.242.2.2/dns-query" # Mullvad(主)
-    - "https://194.242.2.3/dns-query" # Mullvad(备)
-  nameserver-policy:
-    "geosite:private,cn,geolocation-cn":
-      # 国内DNS服务器↓
-      - "https://dns.alidns.com/dns-query" # 阿里云公共DNS
-      - "https://doh.pub/dns-query" # 腾讯DNSPod
-      - "https://doh.360.cn/dns-query" # 360安全DNS
-    "geosite:google,youtube,telegram,gfw,geolocation-!cn":
-      # 国外DNS服务器↓
-      - "https://1.1.1.1/dns-query" # Cloudflare(主)
-      - "https://1.0.0.1/dns-query" # Cloudflare(备)
-      - "https://208.67.222.222/dns-query" # OpenDNS(主)
-      - "https://208.67.220.220/dns-query" # OpenDNS(备)
-      - "https://194.242.2.2/dns-query" # Mullvad(主)
-      - "https://194.242.2.3/dns-query" # Mullvad(备)
+    - "https://doh.pub/dns-query"
+    - "https://dns.alidns.com/dns-query"
+    - "tls://223.5.5.5"
+  direct-nameserver-follow-policy: false # 直连域名的 DNS 不遵循代理规则
   direct-nameserver: []
 external-controller-cors:
   allow-private-network: true
