@@ -104,11 +104,7 @@ dns:
       - "https://208.67.220.220/dns-query" # OpenDNS(备)
       - "https://194.242.2.2/dns-query" # Mullvad(主)
       - "https://194.242.2.3/dns-query" # Mullvad(备)
-  direct-nameserver:
-    # 国内DNS服务器↓
-    - "https://dns.alidns.com/dns-query" # 阿里云公共DNS
-    - "https://doh.pub/dns-query" # 腾讯DNSPod
-    - "https://doh.360.cn/dns-query" # 360安全DNS
+  direct-nameserver: []
 external-controller-cors:
   allow-private-network: true
   allow-origins:
