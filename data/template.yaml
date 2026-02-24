@@ -20,7 +20,7 @@ dns:
   respect-rules: false # 是否让 DNS 解析遵循路由规则
   use-hosts: true # 启用本地 hosts
   use-system-hosts: true # 启用系统 hosts
-  ipv6: true # 禁用 IPv6 DNS 解析
+  ipv6: false
   fake-ip-filter:
     - "*.lan"
     - "*.local"
@@ -33,7 +33,7 @@ dns:
     - "*.msftncsi.com"
     - "www.msftconnecttest.com"
     - "ipv6.shuzilm.cn"
-  default-nameserver:
+  default-nameserver: # 默认 DNS 服务器
     - "223.5.5.5" # 阿里云 DNS（国内）
     - "8.8.8.8" # Google DNS（国外）
     - "2400:3200::1" # 阿里云 IPv6 DNS
