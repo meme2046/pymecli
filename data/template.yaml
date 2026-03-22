@@ -3,7 +3,7 @@ allow-lan: false
 mode: rule
 log-level: warning
 external-controller: "127.0.0.1:9097"
-global-client-fingerprint: chrome
+client-fingerprint: chrome
 unified-delay: true
 ipv6: false
 profile:
@@ -33,11 +33,11 @@ dns:
     - "*.msftncsi.com"
     - "www.msftconnecttest.com"
     - "ipv6.shuzilm.cn"
-    - "tgp.qq.com"
-    - "conf.tgp.qq.com"
+    - "+.qq.com"
+    - "+.tgp.qq.com"
+    - "+.klei.com"
+    - "+.steamserver.net"
     - "dontstarve_rail_x64.exe"
-    - "klei.com"
-    - "steamserver.net"
   default-nameserver: # 默认 DNS 服务器
     - "223.5.5.5" # 阿里云 DNS（国内）
     - "8.8.8.8" # Google DNS（国外）
