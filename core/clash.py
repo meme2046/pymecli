@@ -102,6 +102,10 @@ class ClashYamlGenerator:
                 },
             )
 
+        template["rules"].append("DOMAIN,clash.razord.top,DIRECT")
+        template["rules"].append("DOMAIN,yacd.haishan.me,DIRECT")
+        template["rules"].append("DOMAIN-SUFFIX,kleientertainment.com,全局选择")
+        template["rules"].append("DOMAIN-SUFFIX,klei.com,全局选择")
         # 获取rules
         rule_list = [
             [f"{self.my_rule_base_url}/direct.yaml", "DIRECT"],
@@ -216,8 +220,6 @@ class ClashYamlGenerator:
         template["rules"].extend(
             [
                 "RULE-SET,applications,DIRECT",
-                "DOMAIN,clash.razord.top,DIRECT",
-                "DOMAIN,yacd.haishan.me,DIRECT",
                 "RULE-SET,private,DIRECT",
                 "RULE-SET,icloud,DIRECT",
                 "RULE-SET,apple,DIRECT",
