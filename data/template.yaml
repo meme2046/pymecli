@@ -12,15 +12,15 @@ tun:
   mtu: 1500
 dns:
   enable: true
-  listen: ":5353"
+  listen: ":53"
   enhanced-mode: "fake-ip"
   fake-ip-range: "198.18.0.1/16"
   fake-ip-filter-mode: "blacklist"
   prefer-h3: false
-  respect-rules: false # 是否让 DNS 解析遵循路由规则
+  respect-rules: true # 是否让 DNS 解析遵循路由规则
   use-hosts: true # 启用本地 hosts
   use-system-hosts: true # 启用系统 hosts
-  ipv6: false
+  ipv6: true
   fake-ip-filter:
     - "*.lan"
     - "*.local"
@@ -32,12 +32,6 @@ dns:
     - "localhost.ptlogin2.qq.com"
     - "*.msftncsi.com"
     - "www.msftconnecttest.com"
-    - "ipv6.shuzilm.cn"
-    - "+.qq.com"
-    - "+.tgp.qq.com"
-    - "+.klei.com"
-    - "+.steamserver.net"
-    - "dontstarve_rail_x64.exe"
   default-nameserver: # 默认 DNS 服务器
     - "223.5.5.5" # 阿里云 DNS（国内）
     - "8.8.8.8" # Google DNS（国外）
@@ -62,8 +56,11 @@ dns:
     - "https://doh.pub/dns-query"
     - "https://dns.alidns.com/dns-query"
     - "tls://223.5.5.5"
-  direct-nameserver-follow-policy: false # 直连域名的 DNS 不遵循代理规则
-  direct-nameserver: []
+  direct-nameserver-follow-policy: true # 直连域名的 DNS 不遵循代理规则
+  direct-nameserver:
+    - 223.5.5.5
+    - 223.6.6.6
+    - 114.114.114.114
 external-controller-cors:
   allow-private-network: true
   allow-origins:

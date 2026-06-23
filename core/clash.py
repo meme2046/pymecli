@@ -57,7 +57,7 @@ class ClashYamlGenerator:
                 {
                     "name": "轮询",
                     "type": "load-balance",
-                    "url": "https://www.gstatic.com/generate_204",
+                    "url": "https://api.bitget.com/api/v2/public/time",
                     "interval": 300,
                     "lazy": True,
                     "strategy": "round-robin",
@@ -101,6 +101,13 @@ class ClashYamlGenerator:
                     "use": [f"provider.{item['name']}"],
                 },
             )
+
+        # template["rules"].append("IP-CIDR,255.255.255.255/32,DIRECT,no-resolve")
+        # template["rules"].append("IP-CIDR,224.0.0.0/4,DIRECT,no-resolve")
+        template["rules"].append("IP-CIDR,192.168.0.0/16,DIRECT,no-resolve")
+        template["rules"].append("IP-CIDR,10.0.0.0/8,DIRECT,no-resolve")
+        template["rules"].append("IP-CIDR,172.16.0.0/12,DIRECT,no-resolve")
+        template["rules"].append("IP-CIDR,127.0.0.0/8,DIRECT,no-resolve")
 
         template["rules"].append("DOMAIN,clash.razord.top,DIRECT")
         template["rules"].append("DOMAIN,yacd.haishan.me,DIRECT")
