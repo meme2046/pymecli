@@ -10,7 +10,7 @@ uv run example goodbye Xiaoming -f
 # fastapi server
 
 ```shell
-uv run fast --port 8877
+uv run fast --port 8877 # local server
 uv build
-uv publish --token < TOKEN >
+uv publish --token < TOKEN > # publish
 ```
