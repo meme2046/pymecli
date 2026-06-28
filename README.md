@@ -11,4 +11,6 @@ uv run example goodbye Xiaoming -f
 
 ```shell
 uv run fast --port 8877
+uv build
+uv publish --token < TOKEN >
 ```
