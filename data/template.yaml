@@ -17,9 +17,9 @@ dns:
   fake-ip-range: "198.18.0.1/16"
   fake-ip-filter-mode: "blacklist"
   prefer-h3: false
-  respect-rules: true # 是否让 DNS 解析遵循路由规则
-  use-hosts: true # 启用本地 hosts
-  use-system-hosts: true # 启用系统 hosts
+  respect-rules: false
+  use-hosts: false
+  use-system-hosts: false
   ipv6: true
   fake-ip-filter:
     - "*.lan"
@@ -32,16 +32,17 @@ dns:
     - "localhost.ptlogin2.qq.com"
     - "*.msftncsi.com"
     - "www.msftconnecttest.com"
-  default-nameserver: # 默认 DNS 服务器
-    - "223.5.5.5" # 阿里云 DNS（国内）
-    - "8.8.8.8" # Google DNS（国外）
-    - "2400:3200::1" # 阿里云 IPv6 DNS
-    - "2001:4860:4860::8888" # Google IPv6 DNS
+  default-nameserver:
+    - "system"
+    - "223.6.6.6"
+    - "8.8.8.8"
+    - "2400:3200::1"
+    - "2001:4860:4860::8888"
   nameserver:
-    - "8.8.8.8" # Google DNS（UDP 协议）
-    - "https://doh.pub/dns-query" # 公共 DoH DNS（加密解析，防污染）
-    - "https://dns.alidns.com/dns-query" # 阿里云 DoH DNS（国内稳定）
-  fallback: []
+    - "8.8.8.8"
+    - "https://doh.pub/dns-query"
+    - "https://dns.alidns.com/dns-query"
+  direct-nameserver-follow-policy: false
   fallback-filter:
     geoip: true
     geoip-code: "CN"
@@ -52,15 +53,12 @@ dns:
       - "+.google.com"
       - "+.facebook.com"
       - "+.youtube.com"
+  fallback: []
   proxy-server-nameserver:
     - "https://doh.pub/dns-query"
     - "https://dns.alidns.com/dns-query"
     - "tls://223.5.5.5"
-  direct-nameserver-follow-policy: true # 直连域名的 DNS 不遵循代理规则
-  direct-nameserver:
-    - 223.5.5.5
-    - 223.6.6.6
-    - 114.114.114.114
+  direct-nameserver: []
 external-controller-cors:
   allow-private-network: true
   allow-origins:
