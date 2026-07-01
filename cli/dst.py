@@ -184,7 +184,7 @@ def ucm(
 @app.command()
 def lst(
     file_path: str = typer.Argument(
-        "tmp/modoverrides.lua",
+        "d:/.backups/dontstarvetogether/modoverrides.lua",
         help="modoverrides.lua 文件路径",
     ),
     mod_id: str = typer.Option(
@@ -209,5 +209,5 @@ def lst(
 
 
 if __name__ == "__main__":
-    ucm("tmp/modoverrides.lua", "3486375086")
-    # lst("tmp/modoverrides.lua", "3486375086")
+    # ucm("d:/.backups/dontstarvetogether/modoverrides.lua", "3486375086")
+    lst("d:/.backups/dontstarvetogether/modoverrides.lua", "3486375086")
