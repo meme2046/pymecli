@@ -202,10 +202,10 @@ def lst(
         raise typer.Exit(code=1)
     _, client_mods_list = result
 
-    typer.secho("\n📋 client_mods_list 中的 mod 列表:\n", fg=typer.colors.BLUE)
-    for mod_key, mod_info in client_mods_list.items():
+    typer.secho("\n📋 client_mods_list 中的 mod 列表:", fg=typer.colors.BLUE)
+    for i, (mod_key, mod_info) in enumerate(client_mods_list.items(), 1):
         version = mod_info.get("version", "unknown")
-        typer.secho(f"  {mod_key}: {version}", fg=typer.colors.WHITE)
+        typer.secho(f"{i}. {mod_key}: {version}", fg=typer.colors.WHITE)
 
 
 if __name__ == "__main__":
