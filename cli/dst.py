@@ -12,7 +12,7 @@ STEAM_API_URL = (
 )
 
 
-def get_mod_versions(workshop_ids: List[str]) -> Dict[str, Optional[str]]:
+def get_mod_versions(workshop_ids: List[str]) -> Dict[str, Dict[str, Optional[str]]]:
     if not workshop_ids:
         return {}
 
@@ -28,9 +28,10 @@ def get_mod_versions(workshop_ids: List[str]) -> Dict[str, Optional[str]]:
         typer.secho(f"❌ Steam API 请求失败: {e}", fg=typer.colors.RED)
         return {}
 
-    versions: Dict[str, Optional[str]] = {}
+    versions: Dict[str, Dict[str, Optional[str]]] = {}
     for detail in result["response"].get("publishedfiledetails", []):
         publishedfileid = detail.get("publishedfileid")
+        title = detail.get("title")
         tags = detail.get("tags", [])
         version = None
         for tag in tags:
@@ -38,7 +39,7 @@ def get_mod_versions(workshop_ids: List[str]) -> Dict[str, Optional[str]]:
             if tag_str.startswith("version:"):
                 version = tag_str.replace("version:", "")
                 break
-        versions[publishedfileid] = version
+        versions[publishedfileid] = {"version": version, "title": title}
 
     return versions
 
@@ -145,21 +146,28 @@ def ucm(
         wid = extract_workshop_id(mod_key)
         if not wid:
             continue
-        new_version = versions.get(wid)
-        if new_version is None:
+        mod_data = versions.get(wid)
+        if mod_data is None:
             typer.secho(f"⚠️  {mod_key}: 未获取到版本信息", fg=typer.colors.YELLOW)
+            continue
+        new_version = mod_data.get("version")
+        title = mod_data.get("title", "")
+        if new_version is None:
+            typer.secho(
+                f"⚠️  {mod_key} ({title}): 未获取到版本信息", fg=typer.colors.YELLOW
+            )
             continue
         old_version = mod_info.get("version")
         if old_version != new_version:
             mod_info["version"] = new_version
             updated_count += 1
             typer.secho(
-                f"✅ {mod_key}: {old_version} -> {new_version}",
+                f"✅ {mod_key} ({title}): {old_version} -> {new_version}",
                 fg=typer.colors.GREEN,
             )
         else:
             typer.secho(
-                f"ℹ️  {mod_key}: 已是最新版本 {old_version}",
+                f"ℹ️  {mod_key} ({title}): 已是最新版本 {old_version}",
                 fg=typer.colors.WHITE,
             )
 
