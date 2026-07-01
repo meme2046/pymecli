@@ -97,7 +97,7 @@ def get_client_mods_list(file_path: str, mod_id: str) -> Optional[tuple[dict, di
 
 # update_client_mods
 @app.command()
-def ucm(
+def cmu(
     file_path: str = typer.Argument(
         "d:/.backups/dontstarvetogether/modoverrides.lua",
         help="modoverrides.lua 文件路径",
@@ -189,8 +189,9 @@ def ucm(
         typer.secho("\nℹ️  所有 mod 已是最新版本", fg=typer.colors.YELLOW)
 
 
+# list_client_mods
 @app.command()
-def lst(
+def cml(
     file_path: str = typer.Argument(
         "d:/.backups/dontstarvetogether/modoverrides.lua",
         help="modoverrides.lua 文件路径",
@@ -217,5 +218,5 @@ def lst(
 
 
 if __name__ == "__main__":
-    # ucm("d:/.backups/dontstarvetogether/modoverrides.lua", "3486375086")
-    lst("d:/.backups/dontstarvetogether/modoverrides.lua", "3486375086")
+    # cmu("d:/.backups/dontstarvetogether/modoverrides.lua", "3486375086")
+    cml("d:/.backups/dontstarvetogether/modoverrides.lua", "3486375086")

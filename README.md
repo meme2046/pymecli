@@ -20,5 +20,7 @@ uv publish --token < TOKEN > # publish
 1. 饥荒专服禁client mods使用, 更新client mods version, modoverrides.lua:
 
 ```shell
-uv run dst ucm d:/.backups/dontstarvetogether/modoverrides.lua -o c:/.dst/save/Cluster_1/Master/modoverrides.lua -o c:/.dst/save/Cluster_1/Caves/modoverrides.lua
+uv run dst cum d:/.backups/dontstarvetogether/modoverrides.lua -o c:/.dst/save/Cluster_1/Master/modoverrides.lua -o c:/.dst/save/Cluster_1/Caves/modoverrides.lua
+
+uv run dst cml d:/.backups/dontstarvetogether/modoverrides.lua -m 3486375086
 ```
