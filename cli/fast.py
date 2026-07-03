@@ -136,13 +136,13 @@ def run_app(
         help="ssl certfile",
     ),
     rule: str = typer.Option(
-        "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release",
+        "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release",
         "--rule",
         "-r",
         help="clash Rule base URL",
     ),
     my_rule: str = typer.Option(
-        "https://raw.githubusercontent.com/meme2046/data/refs/heads/main/clash",
+        "https://fastly.jsdelivr.net/gh/meme2046/data@main/clash",
         "--my-rule",
         "-mr",
         help="my clash rule base URL(自定义规则)",
