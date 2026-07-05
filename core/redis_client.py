@@ -8,7 +8,7 @@ import redis
 class RedisClient:
     def __init__(
         self,
-        host=os.getenv("REDIS_HOST", "192.168.123.7"),
+        host=os.getenv("REDIS_HOST", "192.168.124.7"),
         port=int(os.getenv("REDIS_PORT", 6379)),
         db=int(os.getenv("REDIS_DB", 0)),
         password=os.getenv("REDIS_PASSWORD"),

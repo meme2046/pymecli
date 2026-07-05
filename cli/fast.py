@@ -1,4 +1,3 @@
-import os
 from contextlib import asynccontextmanager
 
 import redis.asyncio as redis
@@ -20,10 +19,10 @@ from models.response import SuccessResponse
 async def lifespan(app: FastAPI):
     """管理应用生命周期的上下文管理器"""
     redis_pool = redis.ConnectionPool(
-        host=os.getenv("REDIS_HOST", "192.168.123.7"),
-        port=int(os.getenv("REDIS_PORT", 6379)),
-        db=int(os.getenv("REDIS_DB", 0)),
-        password=os.getenv("REDIS_PASSWORD"),
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+        db=settings.REDIS_DB,
+        password=settings.REDIS_PASSWORD,
         max_connections=20,  # 根据需要调整最大连接数
         decode_responses=True,
     )
@@ -41,9 +40,9 @@ typer_app = typer.Typer()
 
 
 app = FastAPI(
-    title=settings.NAME,
-    description=settings.DESCRIPTION,
-    version=settings.VERSION,
+    title=settings.PROJECT_NAME,
+    description=settings.PROJECT_DESCRIPTION,
+    version=settings.PROJECT_VERSION,
     lifespan=lifespan,
 )
 
@@ -104,7 +103,7 @@ async def general_exception_handler(request, exc):
 
 @app.get("/")
 async def root():
-    return SuccessResponse(data=f"Welcome to {settings.DESCRIPTION}")
+    return SuccessResponse(data=f"Welcome to {settings.PROJECT_DESCRIPTION}")
 
 
 @app.get("/ping", response_class=PlainTextResponse)
@@ -153,7 +152,17 @@ def run_app(
         "-p",
         help="服务器代理,传入则通过代理转换Clash订阅,比如:socks5://127.0.0.1:7897",
     ),
+    redis_host: str = typer.Option(
+        None,
+        "--redis-host",
+        "-r",
+        help="redis host",
+    ),
 ):
+    settings.reload()
+    if redis_host is not None:
+        settings.REDIS_HOST = redis_host
+
     clash_config = ClashConfig(rule, my_rule, proxy)
     init_generator(clash_config)
 
