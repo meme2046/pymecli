@@ -33,14 +33,14 @@
   name = "pymecli"
   readme = "README.md"
   requires-python = ">=3.10"
-  version = "0.4.7"
+  version = "0.4.8"
 
 [project.urls]
   Homepage = "https://pypi.org/project/pymecli"
   Repository = "https://github.com/meme2046/pymecli"
 
 [project.scripts]
-  baidu = "cli.baidu:app"
+  # baidu = "cli.baidu:app" # 废弃
   bitget = "cli.bitget:app"
   dst = "cli.dst:app"
   example = "cli.example:app"

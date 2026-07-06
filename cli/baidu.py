@@ -16,7 +16,7 @@ r = get_redis_client_sync()
 @app.command()
 def acsToken(
     url: str = typer.Argument(
-        "https://gushitong.baidu.com/index/ab-000001?name=%25E4%25B8%258A%25E8%25AF%2581%25E6%258C%2587%25E6%2595%25B0",
+        "https://finance.baidu.com/index/ab-000001?name=%25E4%25B8%258A%25E8%25AF%2581%25E6%258C%2587%25E6%2595%25B0",
         help="request url",
     ),
     timeout: int = typer.Option(
@@ -29,7 +29,7 @@ def acsToken(
     """通过selenium获取百度股事通Acs-Token
 
     Args:
-        url (str, optional): 请求的『URL』地址. Defaults to typer.Argument( "https://gushitong.baidu.com/", help="request url", ).
+        url (str, optional): 请求的『URL』地址. Defaults to typer.Argument( "https://finance.baidu.com/", help="request url", ).
         timeout (int, optional): _description_. Defaults to typer.Option( 3, "--timeout", "-t", help="timeout内如果没有请求完整,会强制中断,然后从已有的请求中获取数据", ).
 
     Returns:
