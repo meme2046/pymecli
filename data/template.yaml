@@ -1,11 +1,11 @@
 mixed-port: 7897
-allow-lan: false
+allow-lan: true
 mode: rule
 log-level: warning
 external-controller: "127.0.0.1:9097"
 client-fingerprint: chrome
 unified-delay: true
-ipv6: false
+ipv6: true
 profile:
   store-selected: true
 tun:

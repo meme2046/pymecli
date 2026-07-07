@@ -1,3 +1,4 @@
+import ipaddress
 import platform
 import secrets
 import string
@@ -6,10 +7,13 @@ import uuid as u
 from datetime import datetime
 
 import arrow
+import ifaddr
 import pytz
 import typer
 from babel.dates import format_datetime
 from cowsay.__main__ import cli
+
+from utils.pyredis import get_redis_client_sync
 
 app = typer.Typer()
 
@@ -138,6 +142,47 @@ def stoken(
 
 def say():
     cli()
+
+
+@app.command()
+def ipv6():
+    """
+    获取本地 IPV6 稳定地址
+    """
+    ips = []
+    adapters = ifaddr.get_adapters(include_unconfigured=False)
+    for adapter in adapters:
+        for ip in adapter.ips:
+            if not ip.is_IPv6:
+                continue
+
+            addr_str = ip.ip[0]
+            try:
+                v6 = ipaddress.IPv6Address(addr_str)
+
+                # 过滤条件：只保留稳定的公网地址
+                if (
+                    v6.is_global  # 全球可路由
+                    and not v6.is_link_local  # 非链路本地
+                    and not v6.is_loopback  # 非回环地址
+                    and not v6.is_private  # 非私有地址
+                    and not v6.is_multicast  # 非组播地址
+                    and not v6.is_unspecified  # 非未指定地址（::）
+                    and ip.network_prefix == 64  # 宽带分配给内网的用户网段几乎统一 /64
+                ):
+                    ips.append(addr_str)
+            except Exception:
+                continue
+
+    if not ips:
+        print("未找到稳定 IPV6 地址")
+        return ips
+
+    print(f"IPV6 稳定地址: {ips}")
+
+    r = get_redis_client_sync()
+    r.set("local.IPv6", ips[0])
+    return ips
 
 
 if __name__ == "__main__":

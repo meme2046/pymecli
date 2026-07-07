@@ -331,12 +331,12 @@ class ClashYamlGenerator:
         template["rules"].append("IP-CIDR,172.16.0.0/12,DIRECT,no-resolve")
         template["rules"].append("IP-CIDR,127.0.0.0/8,DIRECT,no-resolve")
         # ⬇️饥荒服务器相关端口
-        template["rules"].append("DST-PORT,10999,DIRECT")
-        template["rules"].append("DST-PORT,10998,DIRECT")
-        template["rules"].append("DST-PORT,27016,DIRECT")
-        template["rules"].append("DST-PORT,27017,DIRECT")
-        template["rules"].append("DST-PORT,8766,DIRECT")
-        template["rules"].append("DST-PORT,8767,DIRECT")
+        # template["rules"].append("DST-PORT,10999,DIRECT")
+        # template["rules"].append("DST-PORT,10998,DIRECT")
+        # template["rules"].append("DST-PORT,27016,DIRECT")
+        # template["rules"].append("DST-PORT,27017,DIRECT")
+        # template["rules"].append("DST-PORT,8766,DIRECT")
+        # template["rules"].append("DST-PORT,8767,DIRECT")
 
         template["rules"].append("DOMAIN,clash.razord.top,DIRECT")
         template["rules"].append("DOMAIN,yacd.haishan.me,DIRECT")
