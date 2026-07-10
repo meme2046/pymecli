@@ -42,7 +42,7 @@
   Repository = "https://github.com/meme2046/pymecli"
 
 [project.scripts]
-  baidu = "cli.baidu:app"
+  # baidu = "cli.baidu:app"
   bitget = "cli.bitget:app"
   dst = "cli.dst:app"
   example = "cli.example:app"
