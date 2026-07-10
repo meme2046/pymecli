@@ -25,7 +25,7 @@ def get_mod_versions(workshop_ids: List[str]) -> Dict[str, Dict[str, Optional[st
         response.raise_for_status()
         result = response.json()
     except Exception as e:
-        typer.secho(f"❌ Steam API 请求失败: {e}", fg=typer.colors.RED)
+        typer.secho(f"✗ Steam API 请求失败: {e}", fg=typer.colors.RED)
         return {}
 
     versions: Dict[str, Dict[str, Optional[str]]] = {}
@@ -65,48 +65,46 @@ def write_lua_file(file_path: str, data: dict):
         f.write("return " + lua.encode(data) + "\n")
 
 
-def get_client_mods_list(file_path: str, mod_id: str) -> Optional[tuple[dict, dict]]:
+def get_client_mods(file_path: str, mod_id: str) -> Optional[tuple[dict, dict]]:
     """
-    解析 lua 文件，返回 (data, client_mods_list)。
-    失败返回 None（错误信息已由函数自行打印）。
+    解析 lua 文件，返回 (data, client_mods)。
+    失败返回 None(错误信息已由函数自行打印)。
     """
     try:
         data = parse_lua_file(file_path)
     except FileNotFoundError:
-        typer.secho(f"❌ 文件不存在: {file_path}", fg=typer.colors.RED)
+        typer.secho(f"✗ 文件不存在: {file_path}", fg=typer.colors.RED)
         return None
     except Exception as e:
-        typer.secho(f"❌ 解析 Lua 文件失败: {e}", fg=typer.colors.RED)
+        typer.secho(f"✗ 解析 Lua 文件失败: {e}", fg=typer.colors.RED)
         return None
 
     main_mod_key = f"workshop-{mod_id}"
     main_mod = data.get(main_mod_key)
     if not main_mod:
-        typer.secho(f"❌ 未找到 {main_mod_key}", fg=typer.colors.RED)
-        return None
+        typer.secho(f"✗ 未找到 {main_mod_key}", fg=typer.colors.RED)
+        return data, {}
 
-    client_mods_list = main_mod.get("configuration_options", {}).get(
-        "client_mods_list", {}
-    )
-    if not client_mods_list:
-        typer.secho("❌ 未找到 client_mods_list", fg=typer.colors.RED)
-        return None
+    client_mods = main_mod.get("configuration_options", {}).get("client_mods_list", {})
+    if not client_mods:
+        typer.secho("✗ 未找到 client_mods", fg=typer.colors.RED)
+        return data, {}
 
-    return data, client_mods_list
+    return data, client_mods
 
 
 # update_client_mods
 @app.command()
-def cmu(
+def convert_update(
     file_path: str = typer.Argument(
-        "d:/.backups/dontstarvetogether/modoverrides.lua",
+        "d:/github/meme2046/docker/dst/modoverrides.lua",
         help="modoverrides.lua 文件路径",
     ),
     mod_id: str = typer.Option(
         "3486375086",
         "--mod-id",
         "-m",
-        help="主 mod 的 workshop ID",
+        help="模组: 客户端Mod转为服务器Mod<3486375086>的ID, 固定值",
     ),
     output: List[str] = typer.Option(
         None,
@@ -115,34 +113,37 @@ def cmu(
         help="额外的输出路径，可多次指定",
     ),
 ):
-    result = get_client_mods_list(file_path, mod_id)
+    """
+    更新modoverrides.lua中<3486375086>的mods的版本信息
+    """
+    result = get_client_mods(file_path, mod_id)
     if result is None:
         raise typer.Exit(code=1)
-    data, client_mods_list = result
+    data, client_mods = result
 
     workshop_ids = []
-    for key in client_mods_list.keys():
+    for key in client_mods.keys():
         wid = extract_workshop_id(key)
         if wid:
             workshop_ids.append(wid)
 
     if not workshop_ids:
-        typer.secho("❌ 未找到任何 client_mods", fg=typer.colors.RED)
+        typer.secho("✗ 未找到任何 client_mods", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
     typer.secho(
-        f"🔍 发现 {len(workshop_ids)} 个 client mods，正在查询 Steam API...",
+        f"🔍 发现 {len(workshop_ids)} 个 client mods, 正在查询 Steam API...",
         fg=typer.colors.BLUE,
     )
     versions = get_mod_versions(workshop_ids)
 
     if not versions:
-        typer.secho("❌ 未能获取版本信息", fg=typer.colors.RED)
+        typer.secho("✗ 未能获取steam版本信息", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
     typer.secho("📝 正在更新版本号...", fg=typer.colors.BLUE)
     updated_count = 0
-    for mod_key, mod_info in client_mods_list.items():
+    for mod_key, mod_info in client_mods.items():
         wid = extract_workshop_id(mod_key)
         if not wid:
             continue
@@ -167,7 +168,7 @@ def cmu(
             )
         else:
             typer.secho(
-                f"ℹ️  {mod_key} ({title}): 已是最新版本 {old_version}",
+                f"{mod_key} ({title}): 已是最新版本 {old_version}",
                 fg=typer.colors.WHITE,
             )
 
@@ -180,43 +181,112 @@ def cmu(
                 write_lua_file(p, data)
                 typer.secho(f"💾 已保存到: {p}", fg=typer.colors.CYAN)
     except Exception as e:
-        typer.secho(f"❌ 写入文件失败: {e}", fg=typer.colors.RED)
+        typer.secho(f"✗ 写入文件失败: {e}", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
     if updated_count > 0:
         typer.secho(f"\n🎉 成功更新 {updated_count} 个 mod 版本", fg=typer.colors.GREEN)
     else:
-        typer.secho("\nℹ️  所有 mod 已是最新版本", fg=typer.colors.YELLOW)
+        typer.secho("\n✅ 所有 mod 已是最新版本", fg=typer.colors.YELLOW)
 
 
-# list_client_mods
 @app.command()
-def cml(
+def mod_setup(
     file_path: str = typer.Argument(
-        "d:/.backups/dontstarvetogether/modoverrides.lua",
+        "d:/github/meme2046/docker/dst/modoverrides.lua",
         help="modoverrides.lua 文件路径",
     ),
     mod_id: str = typer.Option(
         "3486375086",
         "--mod-id",
         "-m",
-        help="主 mod 的 workshop ID",
+        help="模组: 客户端Mod转为服务器Mod<3486375086>的ID, 固定值",
+    ),
+    output: List[str] = typer.Option(
+        ["dedicated_server_mods_setup.lua"],
+        "--output",
+        "-o",
+        help="mods_setup输出路径,可多次指定",
     ),
 ):
     """
-    列出 client_mods_list 中所有 mod 的当前版本
+    列出所有 mod, 并以<dedicated_server_mods_setup>格式保存到指定文件
     """
-    result = get_client_mods_list(file_path, mod_id)
+    result = get_client_mods(file_path, mod_id)
     if result is None:
         raise typer.Exit(code=1)
-    _, client_mods_list = result
+    data, client_mods = result
 
-    typer.secho("\n📋 client_mods_list 中的 mod 列表:", fg=typer.colors.BLUE)
-    for i, (mod_key, mod_info) in enumerate(client_mods_list.items(), 1):
-        version = mod_info.get("version", "unknown")
-        typer.secho(f"{i}. {mod_key}: {version}", fg=typer.colors.WHITE)
+    client_ids = []
+    for key in client_mods.keys():
+        wid = extract_workshop_id(key)
+        if wid:
+            client_ids.append(wid)
+
+    server_ids = []
+    for key in data.keys():
+        wid = extract_workshop_id(key)
+        if wid:
+            server_ids.append(wid)
+
+    versions = get_mod_versions(server_ids + client_ids)
+
+    if not versions:
+        typer.secho("✗ 未能获取steam版本信息", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    setup_list = []
+
+    typer.secho(
+        f"📢 server_mods({len(server_ids)}):",
+        fg=typer.colors.GREEN,
+    )
+
+    for item in server_ids:
+        mod_data = versions.get(item)
+
+        if mod_data is None:
+            typer.secho(f"✗ {item}: 未获取到版本信息", fg=typer.colors.YELLOW)
+            raise typer.Exit(code=1)
+
+        setup_list.append(f'ServerModSetup("{item}")')
+
+        new_version = mod_data.get("version")
+        title = mod_data.get("title", "")
+
+        typer.secho(
+            f"✅ {item} ({title}): {new_version}",
+            fg=typer.colors.WHITE,
+        )
+
+    typer.secho(
+        f"\n📋 client_mods({len(client_ids)}):",
+        fg=typer.colors.GREEN,
+    )
+
+    for item in client_ids:
+        mod_data = versions.get(item)
+
+        if mod_data is None:
+            typer.secho(f"✗  {item}: 未获取到版本信息", fg=typer.colors.YELLOW)
+            raise typer.Exit(code=1)
+
+        setup_list.append(f'ServerModSetup("{item}")')
+
+        new_version = mod_data.get("version")
+        title = mod_data.get("title", "")
+
+        typer.secho(
+            f"✅ {item} ({title}): {new_version}",
+            fg=typer.colors.WHITE,
+        )
+
+    for p in output:
+        with open(p, "w", encoding="utf-8") as f:
+            f.write("\n".join(setup_list))
+        typer.secho(f"\n💾 <setup_list>已保存到: {p}", fg=typer.colors.CYAN)
 
 
 if __name__ == "__main__":
-    # cmu("d:/.backups/dontstarvetogether/modoverrides.lua", "3486375086")
-    cml("d:/.backups/dontstarvetogether/modoverrides.lua", "3486375086")
+    # cmu("d:/github/meme2046/docker/dst/modoverrides.lua", "3486375086")
+    convert_update("d:/github/meme2046/docker/dst/modoverrides.lua", "3486375086")
