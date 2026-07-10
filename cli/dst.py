@@ -185,9 +185,9 @@ def convert_update(
         raise typer.Exit(code=1)
 
     if updated_count > 0:
-        typer.secho(f"\n🎉 成功更新 {updated_count} 个 mod 版本", fg=typer.colors.GREEN)
+        typer.secho(f"🎉 成功更新 {updated_count} 个 mod 版本", fg=typer.colors.GREEN)
     else:
-        typer.secho("\n✅ 所有 mod 已是最新版本", fg=typer.colors.YELLOW)
+        typer.secho("✅ 所有 mod 已是最新版本", fg=typer.colors.YELLOW)
 
 
 @app.command()
