@@ -1,68 +1,154 @@
-mixed-port: 7897
-allow-lan: true
-mode: rule
-log-level: warning
-external-controller: "127.0.0.1:9097"
-client-fingerprint: chrome
-unified-delay: true
+external-controller: ""
 ipv6: true
-profile:
-  store-selected: true
+mode: rule
+mixed-port: 7897
+socks-port: 0
+port: 0
+redir-port: 0
+tproxy-port: 0
+allow-lan: true
+unified-delay: true
+tcp-concurrent: false
+log-level: info
+find-process-mode: strict
+bind-address: "*"
+lan-allowed-ips:
+  - 0.0.0.0/0
+  - ::/0
+lan-disallowed-ips: []
+authentication: []
+skip-auth-prefixes:
+  - 127.0.0.1/32
+  - ::1/128
 tun:
+  enable: false
+  stack: mixed
+  auto-route: true
+  auto-redirect: false
+  auto-detect-interface: true
+  dns-hijack:
+    - any:53
+  route-exclude-address: []
   mtu: 1500
+  device: Mihomo
 dns:
   enable: true
-  listen: ":53"
-  enhanced-mode: "fake-ip"
-  fake-ip-range: "198.18.0.1/16"
-  fake-ip-filter-mode: "blacklist"
-  prefer-h3: false
-  respect-rules: false
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*"
+    - +.lan
+    - +.local
+    - time.*.com
+    - ntp.*.com
+    - +.market.xiaomi.com
   use-hosts: false
   use-system-hosts: false
-  ipv6: true
-  fake-ip-filter:
-    - "*.lan"
-    - "*.local"
-    - "*.arpa"
-    - "time.*.com"
-    - "ntp.*.com"
-    - "time.*.com"
-    - "+.market.xiaomi.com"
-    - "localhost.ptlogin2.qq.com"
-    - "*.msftncsi.com"
-    - "www.msftconnecttest.com"
+  respect-rules: true
   default-nameserver:
-    - "system"
-    - "223.6.6.6"
-    - "8.8.8.8"
-    - "2400:3200::1"
-    - "2001:4860:4860::8888"
+    - https://223.5.5.5/dns-query
+    - https://223.6.6.6/dns-query
+    - https://8.8.8.8/dns-query
+    - https://1.1.1.1/dns-query
+    - 223.5.5.5
   nameserver:
-    - "8.8.8.8"
-    - "https://doh.pub/dns-query"
-    - "https://dns.alidns.com/dns-query"
-  direct-nameserver-follow-policy: false
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  proxy-server-nameserver:
+    - https://cloudflare-dns.com/dns-query
+    - https://dns.google/dns-query
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  direct-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  fallback:
+    - https://cloudflare-dns.com/dns-query
+    - https://dns.google/dns-query
   fallback-filter:
     geoip: true
-    geoip-code: "CN"
+    geoip-code: CN
     ipcidr:
-      - "240.0.0.0/4"
-      - "0.0.0.0/32"
+      - 240.0.0.0/4
+      - 0.0.0.0/32
+      - 127.0.0.0/8
+      - 10.0.0.0/8
+      - 192.168.0.0/16
     domain:
-      - "+.google.com"
-      - "+.facebook.com"
-      - "+.youtube.com"
-  fallback: []
-  proxy-server-nameserver:
-    - "https://doh.pub/dns-query"
-    - "https://dns.alidns.com/dns-query"
-    - "tls://223.5.5.5"
-  direct-nameserver: []
-external-controller-cors:
-  allow-private-network: true
-  allow-origins:
-    - "*"
+      - +.google.com
+      - +.facebook.com
+      - +.youtube.com
+  direct-nameserver-follow-policy: true
+  prefer-h3: false
+  nameserver-policy:
+    geosite:cn:
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+    geosite:geolocation-!cn:
+      - https://cloudflare-dns.com/dns-query
+      - https://dns.google/dns-query
+    +.jsdelivr.net:
+      - https://cloudflare-dns.com/dns-query
+      - https://dns.google/dns-query
+    +.github.com:
+      - https://cloudflare-dns.com/dns-query
+      - https://dns.google/dns-query
+    +.githubusercontent.com:
+      - https://cloudflare-dns.com/dns-query
+      - https://dns.google/dns-query
+    +.githubassets.com:
+      - https://cloudflare-dns.com/dns-query
+      - https://dns.google/dns-query
+    +.fastly.net:
+      - https://cloudflare-dns.com/dns-query
+      - https://dns.google/dns-query
+sniffer:
+  enable: true
+  parse-pure-ip: true
+  force-dns-mapping: true
+  override-destination: true
+  sniff:
+    HTTP:
+      ports:
+        - "80"
+        - 8080-8880
+      override-destination: true
+    TLS:
+      ports:
+        - "443"
+        - "8443"
+    QUIC:
+      ports:
+        - "443"
+        - "8443"
+        - "4433"
+  skip-domain:
+    - +.push.apple.com
+  skip-dst-address:
+    - 91.105.192.0/23
+    - 91.108.4.0/22
+    - 91.108.8.0/21
+    - 91.108.16.0/21
+    - 91.108.56.0/22
+    - 95.161.64.0/20
+    - 149.154.160.0/20
+    - 185.76.151.0/24
+    - 2001:67c:4e8::/48
+    - 2001:b28:f23c::/47
+    - 2001:b28:f23f::/48
+    - 2a0a:f280:203::/48
+profile:
+  store-selected: true
+  store-fake-ip: true
+geo-auto-update: false
+geo-update-interval: 24
+geodata-mode: true
+geox-url:
+  geoip: https://fastly.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip.dat
+  mmdb: https://fastly.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb
+  asn: https://fastly.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb
+  geosite: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat
 proxies: []
 proxy-providers: {}
 proxy-groups: []
