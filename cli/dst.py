@@ -260,7 +260,7 @@ def mod_setup(
         )
 
     typer.secho(
-        f"\n📋 client_mods({len(client_ids)}):",
+        f"📋 client_mods({len(client_ids)}):",
         fg=typer.colors.GREEN,
     )
 
@@ -284,7 +284,7 @@ def mod_setup(
     for p in output:
         with open(p, "w", encoding="utf-8") as f:
             f.write("\n".join(setup_list))
-        typer.secho(f"\n💾 <setup_list>已保存到: {p}", fg=typer.colors.CYAN)
+        typer.secho(f"💾 <setup_list>已保存到: {p}", fg=typer.colors.CYAN)
 
 
 if __name__ == "__main__":
