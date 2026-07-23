@@ -143,7 +143,7 @@ def say():
 @app.command()
 def ipv6():
     """
-    获取本地 IPV6 稳定地址
+    获取本地 IPv6 稳定地址
     """
     ips = []
     adapters = ifaddr.get_adapters(include_unconfigured=False)
@@ -174,7 +174,7 @@ def ipv6():
         print("未找到稳定 IPV6 地址")
         return ips
 
-    print(f"IPV6 稳定地址: {ips}")
+    print(f"IPv6 稳定地址: {ips}")
 
     r = get_redis_client_sync()
     r.set("local.IPv6", ips[0])
