@@ -187,7 +187,7 @@ def convert_update(
     if updated_count > 0:
         typer.secho(f"🎉 成功更新 {updated_count} 个 mod 版本", fg=typer.colors.GREEN)
     else:
-        typer.secho("✅ 所有 mod 已是最新版本", fg=typer.colors.YELLOW)
+        typer.secho("⬆️ 所有MOD已是最新版本", fg=typer.colors.YELLOW)
 
 
 @app.command()
@@ -260,7 +260,7 @@ def mod_setup(
         )
 
     typer.secho(
-        f"📋 client_mods({len(client_ids)}):",
+        f"📢 client_mods({len(client_ids)}):",
         fg=typer.colors.GREEN,
     )
 
