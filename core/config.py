@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: str = ""
 
     PROJECT_DESCRIPTION: str = (
-        f"{metadata['Summary']}, FastAPI提供: clash订阅转换、finance.baidu api"
+        f"{metadata['Summary']}, FastAPI提供: clash订阅转换、redis API"
     )
     PROJECT_VERSION: str = metadata["Version"]
 
