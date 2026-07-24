@@ -149,13 +149,13 @@ def convert_update(
             continue
         mod_data = versions.get(wid)
         if mod_data is None:
-            typer.secho(f"⚠️  {mod_key}: 未获取到版本信息", fg=typer.colors.YELLOW)
+            typer.secho(f"✗ {mod_key}: 未获取到版本信息", fg=typer.colors.YELLOW)
             continue
         new_version = mod_data.get("version")
         title = mod_data.get("title", "")
         if new_version is None:
             typer.secho(
-                f"⚠️  {mod_key} ({title}): 未获取到版本信息", fg=typer.colors.YELLOW
+                f"✗ {mod_key} ({title}): 未获取到版本信息", fg=typer.colors.YELLOW
             )
             continue
         old_version = mod_info.get("version")
@@ -163,7 +163,7 @@ def convert_update(
             mod_info["version"] = new_version
             updated_count += 1
             typer.secho(
-                f"✅ {mod_key} ({title}): {old_version} -> {new_version}",
+                f"✓ {mod_key} ({title}): {old_version} -> {new_version}",
                 fg=typer.colors.GREEN,
             )
         else:
@@ -187,7 +187,7 @@ def convert_update(
     if updated_count > 0:
         typer.secho(f"🎉 成功更新 {updated_count} 个 mod 版本", fg=typer.colors.GREEN)
     else:
-        typer.secho("⬆️ 所有MOD已是最新版本", fg=typer.colors.YELLOW)
+        typer.secho("✓ 所有MOD已是最新版本", fg=typer.colors.YELLOW)
 
 
 @app.command()
@@ -255,7 +255,7 @@ def mod_setup(
         title = mod_data.get("title", "")
 
         typer.secho(
-            f"✅ {item} ({title}): {new_version}",
+            f"{item} ({title}): {new_version}",
             fg=typer.colors.WHITE,
         )
 
@@ -277,7 +277,7 @@ def mod_setup(
         title = mod_data.get("title", "")
 
         typer.secho(
-            f"✅ {item} ({title}): {new_version}",
+            f"{item} ({title}): {new_version}",
             fg=typer.colors.WHITE,
         )
 
