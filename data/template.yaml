@@ -43,6 +43,10 @@ dns:
     - time.*.com
     - ntp.*.com
     - +.market.xiaomi.com
+    - api.memeniu.xyz
+    - meme.us.kg
+    - +.steamserver.net
+    - +.recaptcha.net
   use-hosts: false
   use-system-hosts: false
   respect-rules: true
@@ -103,6 +107,26 @@ dns:
     +.fastly.net:
       - https://cloudflare-dns.com/dns-query
       - https://dns.google/dns-query
+    api.memeniu.xyz:
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+      - https://[2402:4e00::]/dns-query
+      - https://[2400:3200::1]/dns-query
+    meme.us.kg:
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+      - https://[2402:4e00::]/dns-query
+      - https://[2400:3200::1]/dns-query
+    +.steamserver.net:
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+      - https://[2402:4e00::]/dns-query
+      - https://[2400:3200::1]/dns-query
+    +.recaptcha.net:
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+      - https://[2402:4e00::]/dns-query
+      - https://[2400:3200::1]/dns-query
 sniffer:
   enable: true
   parse-pure-ip: true
