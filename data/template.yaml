@@ -108,25 +108,25 @@ dns:
       - https://cloudflare-dns.com/dns-query
       - https://dns.google/dns-query
     api.memeniu.xyz:
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
       - https://[2402:4e00::]/dns-query
       - https://[2400:3200::1]/dns-query
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
     meme.us.kg:
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
       - https://[2402:4e00::]/dns-query
       - https://[2400:3200::1]/dns-query
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
     +.steamserver.net:
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
       - https://[2402:4e00::]/dns-query
       - https://[2400:3200::1]/dns-query
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
     +.recaptcha.net:
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
       - https://[2402:4e00::]/dns-query
       - https://[2400:3200::1]/dns-query
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
 sniffer:
   enable: true
   parse-pure-ip: true

@@ -7,6 +7,7 @@ from fastapi import Depends
 
 module_dir = Path(__file__).resolve().parent.parent
 
+TEMPLATE_URL = "https://raw.githubusercontent.com/meme2046/data/main/clash/template.yaml"
 
 class ClashConfig:
     def __init__(self, rule_base_url: str, my_rule_base_url: str, request_proxy: str):
@@ -21,6 +22,19 @@ class ClashYamlGenerator:
         self.my_rule_base_url = config.my_rule_base_url
         self.request_proxy = config.request_proxy
 
+    def _load_template(self, proxies=None):
+        """从远程获取 template.yaml，失败时回退到本地文件"""
+        try:
+            response = requests.get(TEMPLATE_URL, proxies=proxies)
+            response.raise_for_status()
+            template = yaml.safe_load(response.text)
+            if template:
+                return template
+        except Exception:
+            pass
+        with open(str(module_dir / "data/template.yaml"), "r", encoding="utf-8") as f:
+            return yaml.safe_load(f)
+
     # 白名单模式 Rules 配置方式
     def genPW(self, sub_list: list[dict]):
         proxies = None
@@ -30,8 +44,7 @@ class ClashYamlGenerator:
                 "https": self.request_proxy,
             }
 
-        with open(str(module_dir / "data/template.yaml"), "r", encoding="utf-8") as f:
-            template = yaml.safe_load(f)
+        template = self._load_template(proxies)
 
         template["proxy-groups"].extend(
             [
@@ -252,8 +265,7 @@ class ClashYamlGenerator:
                 "https": self.request_proxy,
             }
 
-        with open(str(module_dir / "data/template.yaml"), "r", encoding="utf-8") as f:
-            template = yaml.safe_load(f)
+        template = self._load_template(proxies)
 
         template["proxy-groups"].extend(
             [
@@ -443,8 +455,7 @@ class ClashYamlGenerator:
                 "https": self.request_proxy,
             }
 
-        with open(str(module_dir / "data/template.yaml"), "r", encoding="utf-8") as f:
-            template = yaml.safe_load(f)
+        template = self._load_template(proxies)
 
         template["proxy-groups"].extend(
             [
