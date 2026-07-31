@@ -9,7 +9,7 @@ tproxy-port: 0
 allow-lan: true
 unified-delay: true
 tcp-concurrent: false
-log-level: info
+log-level: warning
 find-process-mode: strict
 bind-address: "*"
 lan-allowed-ips:
