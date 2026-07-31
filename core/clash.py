@@ -9,6 +9,34 @@ module_dir = Path(__file__).resolve().parent.parent
 
 TEMPLATE_URL = "https://raw.githubusercontent.com/meme2046/data/main/clash/template.yaml"
 
+# 白名单模式最终规则
+WHITELIST_RULES = [
+    "RULE-SET,applications,DIRECT",
+    "RULE-SET,private,DIRECT",
+    "RULE-SET,icloud,DIRECT",
+    "RULE-SET,apple,DIRECT",
+    "RULE-SET,google,全局选择",
+    "RULE-SET,proxy,全局选择",
+    "RULE-SET,direct,DIRECT",
+    "RULE-SET,lancidr,DIRECT",
+    "RULE-SET,cncidr,DIRECT",
+    "RULE-SET,telegramcidr,全局选择",
+    "GEOIP,LAN,DIRECT",
+    "GEOIP,CN,DIRECT",
+    "MATCH,全局选择",
+]
+
+# 黑名单模式最终规则
+BLACKLIST_RULES = [
+    "RULE-SET,applications,DIRECT",
+    "RULE-SET,private,DIRECT",
+    "RULE-SET,tld-not-cn,全局选择",
+    "RULE-SET,gfw,全局选择",
+    "RULE-SET,telegramcidr,全局选择",
+    "MATCH,DIRECT",
+]
+
+
 class ClashConfig:
     def __init__(self, rule_base_url: str, my_rule_base_url: str, request_proxy: str):
         self.rule_base_url = rule_base_url.rstrip("/")
@@ -22,8 +50,15 @@ class ClashYamlGenerator:
         self.my_rule_base_url = config.my_rule_base_url
         self.request_proxy = config.request_proxy
 
+    # ---------- 通用 helpers ----------
+
+    def _get_proxies(self):
+        if not self.request_proxy:
+            return None
+        return {"http": self.request_proxy, "https": self.request_proxy}
+
     def _load_template(self, proxies=None):
-        """从远程获取 template.yaml，失败时回退到本地文件"""
+        """从远程获取 template.yaml,失败时回退到本地文件"""
         try:
             response = requests.get(TEMPLATE_URL, proxies=proxies)
             response.raise_for_status()
@@ -35,51 +70,10 @@ class ClashYamlGenerator:
         with open(str(module_dir / "data/template.yaml"), "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
-    # 白名单模式 Rules 配置方式
-    def genPW(self, sub_list: list[dict]):
-        proxies = None
-        if self.request_proxy:
-            proxies = {
-                "http": self.request_proxy,
-                "https": self.request_proxy,
-            }
-
-        template = self._load_template(proxies)
-
-        template["proxy-groups"].extend(
-            [
-                {
-                    "name": "全局选择",
-                    "type": "select",
-                    "proxies": ["自动选择", "手动选择", "轮询"]
-                    + [item["name"] for item in sub_list],
-                },
-                {
-                    "name": "自动选择",
-                    "type": "url-test",
-                    "url": "https://www.gstatic.com/generate_204",
-                    "interval": 300,
-                    "tolerance": 11,
-                    "lazy": True,
-                    "use": [f"provider.{item['name']}" for item in sub_list],
-                },
-                {
-                    "name": "手动选择",
-                    "type": "select",
-                    "use": [f"provider.{item['name']}" for item in sub_list],
-                },
-                {
-                    "name": "轮询",
-                    "type": "load-balance",
-                    "url": "https://api.bitget.com/api/v2/public/time",
-                    "interval": 300,
-                    "lazy": True,
-                    "strategy": "round-robin",
-                    "use": [f"provider.{item['name']}" for item in sub_list],
-                },
-            ]
-        )
+    def _fetch_subscriptions(self, sub_list, proxies):
+        """抓取并校验所有订阅,返回 [(item, ps), ...] 和 userinfo"""
         userinfo = ""
+        results = []
         for item in sub_list:
             headers = {"User-Agent": item["user_agent"]} if item["user_agent"] else {}
 
@@ -99,529 +93,228 @@ class ClashYamlGenerator:
             if not ps:
                 raise ValueError("No proxies found in subscription.")
 
-            template["proxy-providers"][f"provider.{item['name']}"] = {
-                "type": "inline",
-                "payload": ps,
-            }
+            results.append((item, ps))
+        return results, userinfo
 
-            template["proxy-groups"].append(
-                {
-                    "name": item["name"],
-                    "type": "url-test",
-                    "url": "https://www.gstatic.com/generate_204",
-                    "interval": 300,
-                    "tolerance": 11,
-                    "lazy": True,
-                    "use": [f"provider.{item['name']}"],
-                },
-            )
-
-        # 获取rules
+    def _add_inline_rule_providers(self, template, proxies):
+        """从 my_rule_base_url 拉取 inline 规则集并写入 template"""
         rule_list = [
             [f"{self.my_rule_base_url}/direct.yaml", "DIRECT"],
             [f"{self.my_rule_base_url}/proxy.yaml", "全局选择"],
-            [
-                f"{self.my_rule_base_url}/round.yaml",
-                "轮询",
-            ],
-            [
-                f"{self.my_rule_base_url}/reject.yaml",
-                "REJECT",
-            ],
+            [f"{self.my_rule_base_url}/round.yaml", "轮询"],
+            [f"{self.my_rule_base_url}/reject.yaml", "REJECT"],
         ]
-
-        for item in rule_list:
-            response = requests.get(item[0], proxies=proxies)
+        for url, target in rule_list:
+            response = requests.get(url, proxies=proxies)
             response.raise_for_status()
             remote = yaml.safe_load(response.text)
-            template["rule-providers"][os.path.basename(item[0])] = {
+            name = os.path.basename(url)
+            template["rule-providers"][name] = {
                 "type": "inline",
                 "behavior": "classical",
                 "payload": remote["payload"],
             }
+            template["rules"].append(f"RULE-SET,{name},{target}")
 
-            template["rules"].append(f"RULE-SET,{os.path.basename(item[0])},{item[1]}")
+    def _http_rule_provider(self, name, behavior):
+        """生成单个 http 类型 rule-provider"""
+        return {
+            "type": "http",
+            "format": "yaml",
+            "behavior": behavior,
+            "url": f"{self.rule_base_url}/{name}.txt",
+            "path": f"./ruleset/{name}.yaml",
+            "interval": 86400,
+        }
 
-        template["rule-providers"].update(
+    def _whitelist_http_rule_providers(self):
+        return {
+            "applications": self._http_rule_provider("applications", "classical"),
+            "private": self._http_rule_provider("private", "domain"),
+            "icloud": self._http_rule_provider("icloud", "domain"),
+            "apple": self._http_rule_provider("apple", "domain"),
+            "google": self._http_rule_provider("google", "domain"),
+            "proxy": self._http_rule_provider("proxy", "domain"),
+            "direct": self._http_rule_provider("direct", "domain"),
+            "lancidr": self._http_rule_provider("lancidr", "ipcidr"),
+            "cncidr": self._http_rule_provider("cncidr", "ipcidr"),
+            "telegramcidr": self._http_rule_provider("telegramcidr", "ipcidr"),
+        }
+
+    def _blacklist_http_rule_providers(self):
+        return {
+            "applications": self._http_rule_provider("applications", "classical"),
+            "private": self._http_rule_provider("private", "domain"),
+            "tld-not-cn": self._http_rule_provider("tld-not-cn", "domain"),
+            "telegramcidr": self._http_rule_provider("telegramcidr", "ipcidr"),
+            "gfw": self._http_rule_provider("gfw", "domain"),
+        }
+
+    def _provider_proxy_groups(self, sub_list):
+        """provider 风格的 proxy-groups(genPW / genPB)"""
+        use_list = [f"provider.{item['name']}" for item in sub_list]
+        return [
             {
-                "applications": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "classical",
-                    "url": f"{self.rule_base_url}/applications.txt",
-                    "path": "./ruleset/applications.yaml",
-                    "interval": 86400,
-                },
-                "private": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/private.txt",
-                    "path": "./ruleset/private.yaml",
-                    "interval": 86400,
-                },
-                "icloud": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/icloud.txt",
-                    "path": "./ruleset/icloud.yaml",
-                    "interval": 86400,
-                },
-                "apple": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/apple.txt",
-                    "path": "./ruleset/apple.yaml",
-                    "interval": 86400,
-                },
-                "google": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/google.txt",
-                    "path": "./ruleset/google.yaml",
-                    "interval": 86400,
-                },
-                "proxy": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/proxy.txt",
-                    "path": "./ruleset/proxy.yaml",
-                    "interval": 86400,
-                },
-                "direct": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/direct.txt",
-                    "path": "./ruleset/direct.yaml",
-                    "interval": 86400,
-                },
-                "lancidr": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "ipcidr",
-                    "url": f"{self.rule_base_url}/lancidr.txt",
-                    "path": "./ruleset/lancidr.yaml",
-                    "interval": 86400,
-                },
-                "cncidr": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "ipcidr",
-                    "url": f"{self.rule_base_url}/cncidr.txt",
-                    "path": "./ruleset/cncidr.yaml",
-                    "interval": 86400,
-                },
-                "telegramcidr": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "ipcidr",
-                    "url": f"{self.rule_base_url}/telegramcidr.txt",
-                    "path": "./ruleset/telegramcidr.yaml",
-                    "interval": 86400,
-                },
-                # "reject": {
-                #     "type": "http",
-                #     "format": "yaml",
-                #     "behavior": "domain",
-                #     "url": f"{self.rule_base_url}/reject.txt",
-                #     "path": "./ruleset/reject.yaml",
-                #     "interval": 86400,
-                # },
+                "name": "全局选择",
+                "type": "select",
+                "proxies": ["自动选择", "手动选择", "轮询"]
+                + [item["name"] for item in sub_list],
             },
+            {
+                "name": "自动选择",
+                "type": "url-test",
+                "url": "https://www.gstatic.com/generate_204",
+                "interval": 300,
+                "tolerance": 11,
+                "lazy": True,
+                "use": use_list,
+            },
+            {
+                "name": "手动选择",
+                "type": "select",
+                "use": use_list,
+            },
+            {
+                "name": "轮询",
+                "type": "load-balance",
+                "url": "https://api.bitget.com/api/v2/public/time",
+                "interval": 300,
+                "lazy": True,
+                "strategy": "round-robin",
+                "use": use_list,
+            },
+        ]
+
+    def _inline_proxy_groups(self, sub_list):
+        """include-all 风格的 proxy-groups(genB)"""
+        return [
+            {
+                "name": "全局选择",
+                "type": "select",
+                "proxies": ["自动选择", "手动选择", "轮询"]
+                + [item["name"] for item in sub_list],
+            },
+            {"name": "自动选择", "type": "url-test", "include-all": True},
+            {"name": "手动选择", "type": "select", "include-all": True},
+            {
+                "name": "轮询",
+                "type": "load-balance",
+                "url": "https://api.bitget.com/api/v2/public/time",
+                "strategy": "round-robin",
+                "include-all": True,
+            },
+        ]
+
+    def _add_provider_sub(self, template, item, ps):
+        """单个订阅写入 proxy-providers + url-test group(genPW / genPB)"""
+        template["proxy-providers"][f"provider.{item['name']}"] = {
+            "type": "inline",
+            "payload": ps,
+        }
+        template["proxy-groups"].append(
+            {
+                "name": item["name"],
+                "type": "url-test",
+                "url": "https://www.gstatic.com/generate_204",
+                "interval": 300,
+                "tolerance": 11,
+                "lazy": True,
+                "use": [f"provider.{item['name']}"],
+            }
         )
 
+    def _add_inline_sub(self, template, item, ps):
+        """单个订阅直接写入 proxies + url-test group(genB)"""
+        template["proxies"].extend(ps)
+        template["proxy-groups"].append(
+            {
+                "name": item["name"],
+                "type": "url-test",
+                "proxies": [p["name"] for p in ps],
+            }
+        )
+
+    def _add_base_rules(self, template, with_dst_port=False):
+        """IP-CIDR / DOMAIN 基础规则(genPB / genB),genB 含饥荒端口"""
         template["rules"].extend(
             [
-                "RULE-SET,applications,DIRECT",
-                "RULE-SET,private,DIRECT",
-                # "RULE-SET,reject,REJECT",
-                "RULE-SET,icloud,DIRECT",
-                "RULE-SET,apple,DIRECT",
-                "RULE-SET,google,全局选择",
-                "RULE-SET,proxy,全局选择",
-                "RULE-SET,direct,DIRECT",
-                "RULE-SET,lancidr,DIRECT",
-                "RULE-SET,cncidr,DIRECT",
-                "RULE-SET,telegramcidr,全局选择",
-                "GEOIP,LAN,DIRECT",
-                "GEOIP,CN,DIRECT",
-                "MATCH,全局选择",
+                "IP-CIDR,192.168.0.0/16,DIRECT,no-resolve",
+                "IP-CIDR,10.0.0.0/8,DIRECT,no-resolve",
+                "IP-CIDR,172.16.0.0/12,DIRECT,no-resolve",
+                "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
             ]
         )
+        if with_dst_port:
+            template["rules"].extend(
+                [
+                    "DST-PORT,10999,DIRECT",
+                    "DST-PORT,10998,DIRECT",
+                    "DST-PORT,27016,DIRECT",
+                    "DST-PORT,27017,DIRECT",
+                    "DST-PORT,8766,DIRECT",
+                    "DST-PORT,8767,DIRECT",
+                ]
+            )
+        template["rules"].extend(
+            [
+                "DOMAIN,clash.razord.top,DIRECT",
+                "DOMAIN,yacd.haishan.me,DIRECT",
+                # "DOMAIN,accounts.klei.com,全局选择",
+            ]
+        )
+
+    # ---------- 三种生成模式 ----------
+
+    # 白名单模式 Rules 配置方式
+    def genPW(self, sub_list: list[dict]):
+        proxies = self._get_proxies()
+        template = self._load_template(proxies)
+
+        template["proxy-groups"].extend(self._provider_proxy_groups(sub_list))
+
+        subs, userinfo = self._fetch_subscriptions(sub_list, proxies)
+        for item, ps in subs:
+            self._add_provider_sub(template, item, ps)
+
+        self._add_inline_rule_providers(template, proxies)
+        template["rule-providers"].update(self._whitelist_http_rule_providers())
+        template["rules"].extend(WHITELIST_RULES)
 
         return template, userinfo
 
     # 黑名单模式 Rules 配置方式
     def genPB(self, sub_list: list[dict]):
-        proxies = None
-        if self.request_proxy:
-            proxies = {
-                "http": self.request_proxy,
-                "https": self.request_proxy,
-            }
-
+        proxies = self._get_proxies()
         template = self._load_template(proxies)
 
-        template["proxy-groups"].extend(
-            [
-                {
-                    "name": "全局选择",
-                    "type": "select",
-                    "proxies": ["自动选择", "手动选择", "轮询"]
-                    + [item["name"] for item in sub_list],
-                },
-                {
-                    "name": "自动选择",
-                    "type": "url-test",
-                    "url": "https://www.gstatic.com/generate_204",
-                    "interval": 300,
-                    "tolerance": 11,
-                    "lazy": True,
-                    "use": [f"provider.{item['name']}" for item in sub_list],
-                },
-                {
-                    "name": "手动选择",
-                    "type": "select",
-                    "use": [f"provider.{item['name']}" for item in sub_list],
-                },
-                {
-                    "name": "轮询",
-                    "type": "load-balance",
-                    "url": "https://api.bitget.com/api/v2/public/time",
-                    "interval": 300,
-                    "lazy": True,
-                    "strategy": "round-robin",
-                    "use": [f"provider.{item['name']}" for item in sub_list],
-                },
-            ]
-        )
+        template["proxy-groups"].extend(self._provider_proxy_groups(sub_list))
 
-        userinfo = ""
-        for item in sub_list:
-            headers = {"User-Agent": item["user_agent"]} if item["user_agent"] else {}
+        subs, userinfo = self._fetch_subscriptions(sub_list, proxies)
+        for item, ps in subs:
+            self._add_provider_sub(template, item, ps)
 
-            if not item["url"]:
-                raise ValueError("Invalid subscription URL.")
-            response = requests.get(item["url"], headers=headers, proxies=proxies)
-            response.raise_for_status()
-            if not userinfo:
-                userinfo = response.headers["Subscription-Userinfo"]
-            remote_config = yaml.safe_load(response.text)
-
-            # 检查 remote_config 是否为 None
-            if remote_config is None:
-                raise ValueError("Invalid subscription content: empty or invalid YAML.")
-
-            ps = remote_config.get("proxies", [])
-            if not ps:
-                raise ValueError("No proxies found in subscription.")
-
-            template["proxy-providers"][f"provider.{item['name']}"] = {
-                "type": "inline",
-                "payload": ps,
-            }
-
-            template["proxy-groups"].append(
-                {
-                    "name": item["name"],
-                    "type": "url-test",
-                    "url": "https://www.gstatic.com/generate_204",
-                    "interval": 300,
-                    "tolerance": 11,
-                    "lazy": True,
-                    "use": [f"provider.{item['name']}"],
-                },
-            )
-
-        template["rules"].append("IP-CIDR,192.168.0.0/16,DIRECT,no-resolve")
-        template["rules"].append("IP-CIDR,10.0.0.0/8,DIRECT,no-resolve")
-        template["rules"].append("IP-CIDR,172.16.0.0/12,DIRECT,no-resolve")
-        template["rules"].append("IP-CIDR,127.0.0.0/8,DIRECT,no-resolve")
-        # ⬇️饥荒服务器相关端口
-        # template["rules"].append("DST-PORT,10999,DIRECT")
-        # template["rules"].append("DST-PORT,10998,DIRECT")
-        # template["rules"].append("DST-PORT,27016,DIRECT")
-        # template["rules"].append("DST-PORT,27017,DIRECT")
-        # template["rules"].append("DST-PORT,8766,DIRECT")
-        # template["rules"].append("DST-PORT,8767,DIRECT")
-
-        template["rules"].append("DOMAIN,clash.razord.top,DIRECT")
-        template["rules"].append("DOMAIN,yacd.haishan.me,DIRECT")
-        # template["rules"].append("DOMAIN,accounts.klei.com,全局选择")
-
-        # 获取rules
-        rule_list = [
-            [f"{self.my_rule_base_url}/direct.yaml", "DIRECT"],
-            [f"{self.my_rule_base_url}/proxy.yaml", "全局选择"],
-            [
-                f"{self.my_rule_base_url}/round.yaml",
-                "轮询",
-            ],
-            [
-                f"{self.my_rule_base_url}/reject.yaml",
-                "REJECT",
-            ],
-        ]
-
-        for item in rule_list:
-            response = requests.get(item[0], proxies=proxies)
-            response.raise_for_status()
-            remote = yaml.safe_load(response.text)
-            template["rule-providers"][os.path.basename(item[0])] = {
-                "type": "inline",
-                "behavior": "classical",
-                "payload": remote["payload"],
-            }
-
-            template["rules"].append(f"RULE-SET,{os.path.basename(item[0])},{item[1]}")
-
-        template["rule-providers"].update(
-            {
-                "applications": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "classical",
-                    "url": f"{self.rule_base_url}/applications.txt",
-                    "path": "./ruleset/applications.yaml",
-                    "interval": 86400,
-                },
-                "private": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/private.txt",
-                    "path": "./ruleset/private.yaml",
-                    "interval": 86400,
-                },
-                "tld-not-cn": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/tld-not-cn.txt",
-                    "path": "./ruleset/tld-not-cn.yaml",
-                    "interval": 86400,
-                },
-                "telegramcidr": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "ipcidr",
-                    "url": f"{self.rule_base_url}/telegramcidr.txt",
-                    "path": "./ruleset/telegramcidr.yaml",
-                    "interval": 86400,
-                },
-                "gfw": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/gfw.txt",
-                    "path": "./ruleset/gfw.yaml",
-                    "interval": 86400,
-                },
-                # "reject": {
-                #     "type": "http",
-                #     "format": "yaml",
-                #     "behavior": "domain",
-                #     "url": f"{self.rule_base_url}/reject.txt",
-                #     "path": "./ruleset/reject.yaml",
-                #     "interval": 86400,
-                # },
-            },
-        )
-
-        template["rules"].extend(
-            [
-                "RULE-SET,applications,DIRECT",
-                "RULE-SET,private,DIRECT",
-                # "RULE-SET,reject,REJECT",
-                "RULE-SET,tld-not-cn,全局选择",
-                "RULE-SET,gfw,全局选择",
-                "RULE-SET,telegramcidr,全局选择",
-                "MATCH,DIRECT",
-            ]
-        )
+        self._add_base_rules(template, with_dst_port=False)
+        self._add_inline_rule_providers(template, proxies)
+        template["rule-providers"].update(self._blacklist_http_rule_providers())
+        template["rules"].extend(BLACKLIST_RULES)
 
         return template, userinfo
 
     def genB(self, sub_list: list[dict]):
-        proxies = None
-        if self.request_proxy:
-            proxies = {
-                "http": self.request_proxy,
-                "https": self.request_proxy,
-            }
-
+        proxies = self._get_proxies()
         template = self._load_template(proxies)
 
-        template["proxy-groups"].extend(
-            [
-                {
-                    "name": "全局选择",
-                    "type": "select",
-                    "proxies": ["自动选择", "手动选择", "轮询"]
-                    + [item["name"] for item in sub_list],
-                },
-                {
-                    "name": "自动选择",
-                    "type": "url-test",
-                    "include-all": True,
-                },
-                {
-                    "name": "手动选择",
-                    "type": "select",
-                    "include-all": True,
-                },
-                {
-                    "name": "轮询",
-                    "type": "load-balance",
-                    "url": "https://api.bitget.com/api/v2/public/time",
-                    "strategy": "round-robin",
-                    "include-all": True,
-                },
-            ]
-        )
+        template["proxy-groups"].extend(self._inline_proxy_groups(sub_list))
 
-        userinfo = ""
         template["proxies"] = []
-        for item in sub_list:
-            headers = {"User-Agent": item["user_agent"]} if item["user_agent"] else {}
+        subs, userinfo = self._fetch_subscriptions(sub_list, proxies)
+        for item, ps in subs:
+            self._add_inline_sub(template, item, ps)
 
-            if not item["url"]:
-                raise ValueError("Invalid subscription URL.")
-            response = requests.get(item["url"], headers=headers, proxies=proxies)
-            response.raise_for_status()
-            if not userinfo:
-                userinfo = response.headers["Subscription-Userinfo"]
-            remote_config = yaml.safe_load(response.text)
-
-            # 检查 remote_config 是否为 None
-            if remote_config is None:
-                raise ValueError("Invalid subscription content: empty or invalid YAML.")
-
-            ps = remote_config.get("proxies", [])
-            if not ps:
-                raise ValueError("No proxies found in subscription.")
-
-            template["proxies"].extend(ps)
-
-            template["proxy-groups"].append(
-                {
-                    "name": item["name"],
-                    "type": "url-test",
-                    "proxies": [item["name"] for item in ps],
-                },
-            )
-
-        template["rules"].append("IP-CIDR,192.168.0.0/16,DIRECT,no-resolve")
-        template["rules"].append("IP-CIDR,10.0.0.0/8,DIRECT,no-resolve")
-        template["rules"].append("IP-CIDR,172.16.0.0/12,DIRECT,no-resolve")
-        template["rules"].append("IP-CIDR,127.0.0.0/8,DIRECT,no-resolve")
-        # ⬇️饥荒服务器相关端口
-        template["rules"].append("DST-PORT,10999,DIRECT")
-        template["rules"].append("DST-PORT,10998,DIRECT")
-        template["rules"].append("DST-PORT,27016,DIRECT")
-        template["rules"].append("DST-PORT,27017,DIRECT")
-        template["rules"].append("DST-PORT,8766,DIRECT")
-        template["rules"].append("DST-PORT,8767,DIRECT")
-
-        template["rules"].append("DOMAIN,clash.razord.top,DIRECT")
-        template["rules"].append("DOMAIN,yacd.haishan.me,DIRECT")
-        # template["rules"].append("DOMAIN,accounts.klei.com,全局选择")
-
-        # 获取rules
-        rule_list = [
-            [f"{self.my_rule_base_url}/direct.yaml", "DIRECT"],
-            [f"{self.my_rule_base_url}/proxy.yaml", "全局选择"],
-            [
-                f"{self.my_rule_base_url}/round.yaml",
-                "轮询",
-            ],
-            [
-                f"{self.my_rule_base_url}/reject.yaml",
-                "REJECT",
-            ],
-        ]
-
-        for item in rule_list:
-            response = requests.get(item[0], proxies=proxies)
-            response.raise_for_status()
-            remote = yaml.safe_load(response.text)
-            template["rule-providers"][os.path.basename(item[0])] = {
-                "type": "inline",
-                "behavior": "classical",
-                "payload": remote["payload"],
-            }
-
-            template["rules"].append(f"RULE-SET,{os.path.basename(item[0])},{item[1]}")
-
-        template["rule-providers"].update(
-            {
-                "applications": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "classical",
-                    "url": f"{self.rule_base_url}/applications.txt",
-                    "path": "./ruleset/applications.yaml",
-                    "interval": 86400,
-                },
-                "private": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/private.txt",
-                    "path": "./ruleset/private.yaml",
-                    "interval": 86400,
-                },
-                "tld-not-cn": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/tld-not-cn.txt",
-                    "path": "./ruleset/tld-not-cn.yaml",
-                    "interval": 86400,
-                },
-                "telegramcidr": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "ipcidr",
-                    "url": f"{self.rule_base_url}/telegramcidr.txt",
-                    "path": "./ruleset/telegramcidr.yaml",
-                    "interval": 86400,
-                },
-                "gfw": {
-                    "type": "http",
-                    "format": "yaml",
-                    "behavior": "domain",
-                    "url": f"{self.rule_base_url}/gfw.txt",
-                    "path": "./ruleset/gfw.yaml",
-                    "interval": 86400,
-                },
-                # "reject": {
-                #     "type": "http",
-                #     "format": "yaml",
-                #     "behavior": "domain",
-                #     "url": f"{self.rule_base_url}/reject.txt",
-                #     "path": "./ruleset/reject.yaml",
-                #     "interval": 86400,
-                # },
-            },
-        )
-
-        template["rules"].extend(
-            [
-                "RULE-SET,applications,DIRECT",
-                "RULE-SET,private,DIRECT",
-                # "RULE-SET,reject,REJECT",
-                "RULE-SET,tld-not-cn,全局选择",
-                "RULE-SET,gfw,全局选择",
-                "RULE-SET,telegramcidr,全局选择",
-                "MATCH,DIRECT",
-            ]
-        )
+        self._add_base_rules(template, with_dst_port=True)
+        self._add_inline_rule_providers(template, proxies)
+        template["rule-providers"].update(self._blacklist_http_rule_providers())
+        template["rules"].extend(BLACKLIST_RULES)
 
         return template, userinfo
 
