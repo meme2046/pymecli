@@ -1,18 +1,17 @@
 from sqlalchemy import Engine
 
 from utils import logger
-from utils.mysql import mysql_to_csv, mysql_to_redis_and_csv
+from utils.mysql import mysql_to_csv, mysql_to_redis
 
 
-async def grid_open(engine: Engine, csv_path: str):
+async def grid_open(engine: Engine):
     query = "select * from gate where ((cost is not null or benefit is not null) and profit is null) and up_status = 0 and order_id is not null and deleted_at is null;"
     key_prefix = "gate_grid"
     table = "gate"
 
-    row_count = await mysql_to_redis_and_csv(
+    row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        csv_path,
         table,
         query,
         update_status=1,
@@ -29,15 +28,14 @@ async def grid_open(engine: Engine, csv_path: str):
     logger.info(f"🧮 gate open count:({row_count})")
 
 
-async def grid_close(engine: Engine, csv_path: str):
+async def grid_close(engine: Engine):
     query = "select * from gate where profit is not null and up_status in (0,1) and deleted_at is null;"
     key_prefix = "gate_grid"
     table = "gate"
 
-    row_count = await mysql_to_redis_and_csv(
+    row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        csv_path,
         table,
         query,
         update_status=2,

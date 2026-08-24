@@ -21,23 +21,19 @@ app = typer.Typer()
 @app.command()
 def sync(
     env_path: str = "d:/.env",
-    csv_dir: str = "d:/github/meme2046/data",
 ):
-    """同步mysql中grid数据到csv文件"""
+    """同步mysql中grid数据到redis"""
     engine = get_database_engine(env_path)
-    grid_csv_fp = f"{csv_dir}/bitget_grid_0.csv"
-    sf_csv_fp = f"{csv_dir}/bitget_sf_0.csv"
-    ff_csv_fp = f"{csv_dir}/bitget_ff_0.csv"
 
-    asyncio.run(grid_open(engine, grid_csv_fp))
-    asyncio.run(grid_close(engine, grid_csv_fp))
+    asyncio.run(grid_open(engine))
+    asyncio.run(grid_close(engine))
 
-    asyncio.run(bitget_sf_open(engine, sf_csv_fp))
-    asyncio.run(bitget_sf_close(engine, sf_csv_fp))
+    asyncio.run(bitget_sf_open(engine))
+    asyncio.run(bitget_sf_close(engine))
 
-    asyncio.run(bitget_ff_open(engine, ff_csv_fp))
-    asyncio.run(bitget_ff_pending(engine, ff_csv_fp))
-    asyncio.run(bitget_ff_close(engine, ff_csv_fp))
+    asyncio.run(bitget_ff_open(engine))
+    asyncio.run(bitget_ff_pending(engine))
+    asyncio.run(bitget_ff_close(engine))
 
 
 @app.command()

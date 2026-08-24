@@ -70,22 +70,7 @@ def mysql_to_csv(
     # csv去重,保留最后加入的数据
     deduplicated(csv_path, d_column_names, "last", pd_dtype)
 
-    # 根据提取的 'id' 列更新数据库中 up_status 字段
-    if ids:
-        # 使用 text() 构建查询时，确保 :ids 是一个列表
-        update_query = text(
-            f"UPDATE {table} SET up_status = :status WHERE id IN ({','.join(map(str, ids))});"
-        )
-        with engine.connect() as connection:
-            with connection.begin():
-                result = connection.execute(
-                    update_query,
-                    {"status": update_status},
-                )
-
-                return result.rowcount
-
-    return 0
+    return _update_status(engine, table, ids, update_status)
 
 
 async def mysql_to_redis_and_csv(
@@ -185,9 +170,68 @@ async def mysql_to_redis_and_csv(
 
     logger.debug(f"𝄜 to csv: {count}")
 
-    # 根据提取的 'id' 列更新数据库中 up_status 字段
+    return _update_status(engine, table, ids, update_status)
+
+
+async def mysql_to_redis(
+    engine: Engine,
+    key_prefix: str,
+    table: str,
+    query: str,
+    update_status: int,
+    d_column_names: list[str],
+    pd_dtype: dict | None = None,
+    del_column_names: list[str] = ["id", "created_at", "updated_at", "deleted_at"],
+) -> int:
+    df = pd.read_sql(query, engine, dtype=pd_dtype)
+    df["open_at"] = df["open_at"].fillna(df["created_at"])
+    ids = df["id"].tolist()
+    columns_to_drop = [col for col in del_column_names if col in df.columns]
+    df = df.drop(columns=columns_to_drop)
+
+    datetime_cols = [
+        "open_at",
+        "close_at",
+        "spot_close_at",
+        "futures_close_at",
+        "long_close_at",
+        "short_close_at",
+    ]
+
+    logger.debug(df.head())
+    logger.debug(df.dtypes)
+
+    for col in datetime_cols:
+        if col in df.columns:
+            df[col] = dt_to_timestamp(df[col])
+
+    r = get_redis_client()
+    pipe = r.pipeline()
+    count = 0
+    n1, n2 = d_column_names
+
+    for _, row in df.iterrows():
+        idx1 = row[n1]
+        idx2 = row[n2]
+        if not idx1 or not idx2:
+            raise ValueError("ERR:id行无效")
+        id = f"{idx1}_{idx2}"
+        key = f"{key_prefix}:{id}"
+
+        row_dict = row.where(pd.notna(row), "").to_dict()
+
+        pipe.hset(key, mapping=row_dict)
+        pipe.zadd(f"by_time:{key_prefix}", {id: time.time()})
+        count += 1
+
+    await pipe.execute()
+    logger.debug(f"🧱 to redis: {count}")
+
+    return _update_status(engine, table, ids, update_status)
+
+
+def _update_status(engine: Engine, table: str, ids: list, update_status: int) -> int:
     if ids:
-        # 使用 text() 构建查询时，确保 :ids 是一个列表
         update_query = text(
             f"UPDATE {table} SET up_status = :status WHERE id IN ({','.join(map(str, ids))});"
         )
@@ -197,7 +241,5 @@ async def mysql_to_redis_and_csv(
                     update_query,
                     {"status": update_status},
                 )
-
                 return result.rowcount
-
     return 0

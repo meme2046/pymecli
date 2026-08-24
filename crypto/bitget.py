@@ -4,7 +4,7 @@ import requests
 from sqlalchemy import Engine
 
 from utils import logger
-from utils.mysql import mysql_to_csv, mysql_to_redis_and_csv
+from utils.mysql import mysql_to_csv, mysql_to_redis
 
 
 def tickers(url: str, symbols: list, proxy: str | None = None):
@@ -47,15 +47,14 @@ def spot_tickers(symbols: list, proxy: str | None = None):
     tickers(url, symbols, proxy)
 
 
-async def bitget_sf_open(engine: Engine, csv_fp: str):
+async def bitget_sf_open(engine: Engine):
     query = "select * from bitget_sf where spot_open_usdt is not null and futures_open_usdt is not null and pnl is null and up_status = 0 and deleted_at is null;"
     key_prefix = "bitget_sf"
     table = "bitget_sf"
 
-    row_count = await mysql_to_redis_and_csv(
+    row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        csv_fp,
         table,
         query,
         update_status=1,
@@ -76,15 +75,14 @@ async def bitget_sf_open(engine: Engine, csv_fp: str):
     logger.info(f"🚀 bitget SF open count:({row_count})")
 
 
-async def bitget_ff_open(engine: Engine, csv_fp: str):
+async def bitget_ff_open(engine: Engine):
     key_prefix = "bitget_ff"
     table = "bitget_ff"
     query = f"select * from {table} where long_open_usdt is not null and short_open_usdt is not null and pnl is null and up_status = 0 and deleted_at is null;"
 
-    row_count = await mysql_to_redis_and_csv(
+    row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        csv_fp,
         table,
         query,
         update_status=1,
@@ -105,15 +103,14 @@ async def bitget_ff_open(engine: Engine, csv_fp: str):
     logger.info(f"💰 bitget FF open count:({row_count})")
 
 
-async def bitget_sf_close(engine: Engine, csv_path: str):
+async def bitget_sf_close(engine: Engine):
     query = "select * from bitget_sf where pnl is not null and up_status in (0,1);"
     key_prefix = "bitget_sf"
     table = "bitget_sf"
 
-    row_count = await mysql_to_redis_and_csv(
+    row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        csv_path,
         table,
         query,
         update_status=2,
@@ -134,15 +131,14 @@ async def bitget_sf_close(engine: Engine, csv_path: str):
     logger.info(f"🚀 bitget SF close count:({row_count})")
 
 
-async def bitget_ff_pending(engine: Engine, csv_path: str):
+async def bitget_ff_pending(engine: Engine):
     key_prefix = "bitget_ff"
     table = "bitget_ff"
     query = f"select * from {table} where pnl is null and (long_close_at is not null or short_close_at is not null) and up_status in (1);"
 
-    row_count = await mysql_to_redis_and_csv(
+    row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        csv_path,
         table,
         query,
         update_status=2,
@@ -163,15 +159,14 @@ async def bitget_ff_pending(engine: Engine, csv_path: str):
     logger.info(f"💰 bitget FF pending count:({row_count})")
 
 
-async def bitget_ff_close(engine: Engine, csv_path: str):
+async def bitget_ff_close(engine: Engine):
     key_prefix = "bitget_ff"
     table = "bitget_ff"
     query = f"select * from {table} where pnl is not null and up_status in (0,1,2);"
 
-    row_count = await mysql_to_redis_and_csv(
+    row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        csv_path,
         table,
         query,
         update_status=3,
@@ -192,15 +187,14 @@ async def bitget_ff_close(engine: Engine, csv_path: str):
     logger.info(f"💰 bitget FF close count:({row_count})")
 
 
-async def grid_open(engine: Engine, csv_path: str):
+async def grid_open(engine: Engine):
     query = "select * from bitget where ((cost is not null or benefit is not null) and profit is null) and up_status = 0 and order_id is not null and deleted_at is null;"
     key_prefix = "bitget_grid"
     table = "bitget"
 
-    row_count = await mysql_to_redis_and_csv(
+    row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        csv_path,
         table,
         query,
         update_status=1,
@@ -217,15 +211,14 @@ async def grid_open(engine: Engine, csv_path: str):
     logger.info(f"🧮 bitget grid open count:({row_count})")
 
 
-async def grid_close(engine: Engine, csv_path: str):
+async def grid_close(engine: Engine):
     query = "select * from bitget where profit is not null and up_status in (0,1) and deleted_at is null;"
     key_prefix = "bitget_grid"
     table = "bitget"
 
-    row_count = await mysql_to_redis_and_csv(
+    row_count = await mysql_to_redis(
         engine,
         key_prefix,
-        csv_path,
         table,
         query,
         update_status=2,
