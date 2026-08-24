@@ -29,6 +29,7 @@
     "pydantic-settings>=2.14.2",
     "netifaces-plus>=0.12.5",
     "ifaddr>=0.2.0",
+    "telethon>=1.44.0",
   ]
   description = "My CLI"
   license = { text = "MIT" }
@@ -51,6 +52,7 @@
   util = "cli.util:app"
   # 临时命令
   rd = "cli.redis_csv:app"
+  # tele = "cli.tele:app"
 
 [tool.uv]
 [[tool.uv.index]]
