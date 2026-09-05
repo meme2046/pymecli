@@ -12,10 +12,10 @@ app = typer.Typer()
 @app.command()
 def info(
     dotenv_path: str = typer.Argument(
-        help="dotenv file contains TELE_SEESION_STRING", default="d:/.env"
+        help="dotenv file contains TELE_SEESION_STRING", default=".env"
     ),
 ):
-    load_dotenv("d:/.env")
+    load_dotenv(dotenv_path)
     logger.info(os.getenv("TELE_SESSION_STRING"))
 
 
@@ -23,7 +23,7 @@ def info(
 def check(
     dotenv_path: str = typer.Argument(
         help="dotenv file contains TELE_SESSION_STRING / TELE_API_ID / TELE_API_HASH",
-        default="d:/.env",
+        default=".env",
     ),
 ):
     """验证 TELE_SESSION_STRING 是否有效。
@@ -87,7 +87,7 @@ def check(
 def login(
     dotenv_path: str = typer.Argument(
         help="dotenv file containing TELE_API_ID / TELE_API_HASH",
-        default="d:/.env",
+        default=".env",
     ),
 ):
     """交互式登录并打印 TELE_SESSION_STRING。
@@ -141,7 +141,7 @@ def upload(
         help="要上传的图片文件路径",
     ),
     dotenv_path: str = typer.Option(
-        help="dotenv file path", default="d:/.env"
+        help="dotenv file path", default=".env"
     ),
 ):
     """上传图片到指定 Telegram 频道。
@@ -289,7 +289,7 @@ def upload(
 @app.command()
 def list_channels(
     dotenv_path: str = typer.Option(
-        help="dotenv file path", default="d:/.env"
+        help="dotenv file path", default=".env"
     ),
 ):
     """列出当前账号加入的所有频道及其 ID。

@@ -20,7 +20,10 @@ app = typer.Typer()
 
 @app.command()
 def sync(
-    env_path: str = "d:/.env",
+    env_path: str = typer.Argument(
+        ".env",
+        help="dotenv环境变量路径",
+    ),
 ):
     """同步mysql中grid数据到redis"""
     engine = get_database_engine(env_path)

@@ -137,8 +137,7 @@ def test():
 
 @timeit
 def datetime_test():
-    env_path = "d:/.env"
-    engine = get_database_engine(env_path)
+    engine = get_database_engine()
     query = "select * from gate where order_id = '988422516603'"
 
     df = pd.read_sql(
@@ -195,7 +194,6 @@ if __name__ == "__main__":
     # bitget_0_fp = "d:/github/meme2046/data/bitget_0.csv"
     # bitget_0_fp_0 = "d:/github/meme2046/data/bitget_0_c.csv"
     # pd_str(gate_0_fp, ["fx_order_id"])
-    # pd_db_str(bitget_0_fp, "d:/.env", "bitget", "buy_px")
     # logger.info("main")
     datetime_test()
     # pd_print_test()

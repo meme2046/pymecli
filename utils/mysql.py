@@ -10,7 +10,7 @@ from utils.pd import deduplicated, dt_to_timestamp
 from utils.pyredis import get_redis_client
 
 
-def get_database_engine(env_path: str) -> Engine:
+def get_database_engine(env_path: str = ".env") -> Engine:
     """创建数据库引擎"""
     load_dotenv(env_path)
     host = os.getenv("MYSQL_HOST")

@@ -8,8 +8,9 @@ logger = get_logger(__name__)
 
 
 def env_print():
-    load_dotenv("d:/.env")
-    logger.info(os.getenv("UNI_CLI_MYSQL_HOST"))
+    load_dotenv()
+    logger.info(os.getenv("MYSQL_HOST"))
+    
 
 
 if __name__ == "__main__":
