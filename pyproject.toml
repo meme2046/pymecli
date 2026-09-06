@@ -49,6 +49,7 @@
   example = "cli.example:app"
   fast = "cli.fast:typer_app"
   gate = "cli.gate:app"
+  okx = "cli.okx:app"
   util = "cli.util:app"
   # 临时命令
   rd = "cli.redis_csv:app"
