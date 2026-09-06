@@ -128,8 +128,11 @@ async def mysql_to_redis_and_csv(
 
         # 1. 写入完整数据到 Hash（自动覆盖）
         pipe.hset(key, mapping=row_dict)
-        # 2. 写入 ZSet 索引：score = 开仓时间戳
-        pipe.zadd(f"by_time:{key_prefix}", {id: row["open_at"]})
+        # 2. 写入 ZSet 索引：score = 开仓时间戳（空值用 0 兜底）
+        score = row["open_at"]
+        if score is None or pd.isna(score):
+            score = 0
+        pipe.zadd(f"by_time:{key_prefix}", {id: score})
         count += 1
 
     await pipe.execute()
@@ -220,7 +223,10 @@ async def mysql_to_redis(
         row_dict = row.where(pd.notna(row), "").to_dict()
 
         pipe.hset(key, mapping=row_dict)
-        pipe.zadd(f"by_time:{key_prefix}", {id: row["open_at"]})
+        score = row["open_at"]
+        if score is None or pd.isna(score):
+            score = 0
+        pipe.zadd(f"by_time:{key_prefix}", {id: score})
         count += 1
 
     await pipe.execute()

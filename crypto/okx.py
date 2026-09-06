@@ -5,7 +5,7 @@ from utils.mysql import mysql_to_redis
 
 
 async def grid_open(engine: Engine):
-    query = "select * from okx_spot where ((cost is not null or benefit is not null) and profit is null) and up_status = 0 and order_id is not null and deleted_at is null limit 20;"
+    query = "select * from okx_spot where ((cost is not null or benefit is not null) and profit is null) and up_status = 0 and order_id is not null and deleted_at is null;"
     key_prefix = "okx_grid"
     table = "okx_spot"
 
@@ -29,7 +29,7 @@ async def grid_open(engine: Engine):
 
 
 async def grid_close(engine: Engine):
-    query = "select * from okx_spot where profit is not null and up_status in (0,1) and deleted_at is null limit 20;"
+    query = "select * from okx_spot where profit is not null and up_status in (0,1) and deleted_at is null;"
     key_prefix = "okx_grid"
     table = "okx_spot"
 
