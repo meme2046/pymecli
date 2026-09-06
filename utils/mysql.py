@@ -1,5 +1,4 @@
 import os
-import time
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -129,8 +128,8 @@ async def mysql_to_redis_and_csv(
 
         # 1. 写入完整数据到 Hash（自动覆盖）
         pipe.hset(key, mapping=row_dict)
-        # 2. 写入 ZSet 索引：score = Unix 时间戳
-        pipe.zadd(f"by_time:{key_prefix}", {id: time.time()})
+        # 2. 写入 ZSet 索引：score = 开仓时间戳
+        pipe.zadd(f"by_time:{key_prefix}", {id: row["open_at"]})
         count += 1
 
     await pipe.execute()
@@ -221,7 +220,7 @@ async def mysql_to_redis(
         row_dict = row.where(pd.notna(row), "").to_dict()
 
         pipe.hset(key, mapping=row_dict)
-        pipe.zadd(f"by_time:{key_prefix}", {id: time.time()})
+        pipe.zadd(f"by_time:{key_prefix}", {id: row["open_at"]})
         count += 1
 
     await pipe.execute()
