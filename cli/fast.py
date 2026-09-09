@@ -18,11 +18,8 @@ from models.response import SuccessResponse
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """管理应用生命周期的上下文管理器"""
-    redis_pool = redis.ConnectionPool(
-        host=settings.REDIS_HOST,
-        port=settings.REDIS_PORT,
-        db=settings.REDIS_DB,
-        password=settings.REDIS_PASSWORD,
+    redis_pool = redis.ConnectionPool.from_url(
+        settings.REDIS_URL,
         max_connections=20,  # 根据需要调整最大连接数
         decode_responses=True,
     )
@@ -152,16 +149,15 @@ def run_app(
         "-p",
         help="服务器代理,传入则通过代理转换Clash订阅,比如:socks5://127.0.0.1:7897",
     ),
-    redis_host: str = typer.Option(
+    redis_url: str = typer.Option(
         None,
-        "--redis-host",
-        "-r",
-        help="redis host",
+        "--redis-url",
+        help="redis url, 格式: redis://[user:password@]host[:port][/db]",
     ),
 ):
     settings.reload()
-    if redis_host is not None:
-        settings.REDIS_HOST = redis_host
+    if redis_url is not None:
+        settings.REDIS_URL = redis_url
 
     clash_config = ClashConfig(rule, my_rule, proxy)
     init_generator(clash_config)

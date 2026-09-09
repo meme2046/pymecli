@@ -8,26 +8,17 @@ import redis
 class RedisClient:
     def __init__(
         self,
-        host=os.getenv("REDIS_HOST", "192.168.123.7"),
-        port=int(os.getenv("REDIS_PORT", 6379)),
-        db=int(os.getenv("REDIS_DB", 0)),
-        password=os.getenv("REDIS_PASSWORD"),
-        decode_responses=True,
+        url: str = os.getenv("REDIS_URL", "redis://192.168.123.7:6379/0"),
+        decode_responses: bool = True,
     ):
         """
         初始化Redis客户端
-        :param host: Redis服务器地址
-        :param port: Redis服务器端口
-        :param db: 数据库编号
-        :param password: 密码（如果需要）
+        :param url: Redis连接URL, 格式 redis://[user:password@]host[:port][/db]
         :param decode_responses: 是否自动解码响应（将字节转换为字符串）
         """
 
-        self.client = redis.Redis(
-            host=host,
-            port=port,
-            db=db,
-            password=password,
+        self.client = redis.Redis.from_url(
+            url,
             decode_responses=decode_responses,
             socket_connect_timeout=5,
             socket_timeout=5,

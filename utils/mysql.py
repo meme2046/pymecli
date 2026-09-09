@@ -1,4 +1,6 @@
 import os
+import re
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -8,25 +10,62 @@ from utils import logger
 from utils.pd import deduplicated, dt_to_timestamp
 from utils.pyredis import get_redis_client
 
+# Go go-sql-driver/mysql 专有参数，Python pymysql / SQLAlchemy 不支持
+_GO_DSN_PARAMS = {
+    "parseTime", "loc", "timeout", "readTimeout", "writeTimeout",
+    "allowNativePasswords", "tls", "serverCert", "clientCert",
+    "clientKey", "multiStatements", "columnsWithAlias", "interpolateParams"}
+
+
+def _strip_go_params(query: str) -> str:
+    """从 query string 中移除 Go DSN 专有参数"""
+    if not query:
+        return query
+    kept = [(k, v) for k, v in parse_qsl(query) if k not in _GO_DSN_PARAMS]
+    return urlencode(kept)
+
+
+def _to_sqlalchemy_url(dsn: str) -> str:
+    """
+    将 Go/Node 通用 MySQL DSN 转为 SQLAlchemy URL。
+
+    输入格式(Go go-sql-driver/mysql DSN 或 Node mysql URI):
+        root:password@192.168.123.7:3366/bot_tx?charset=utf8mb4&parseTime=True&loc=Local
+        root:password@tcp(192.168.123.7:3366)/bot_tx?charset=utf8mb4
+        mysql://root:password@192.168.123.7:3306/mydb
+
+    输出格式(SQLAlchemy):
+        mysql+pymysql://root:password@192.168.123.7:3366/bot_tx?charset=utf8mb4
+    """
+    # 如果已经是完整的 scheme:// URL，直接处理
+    if "://" in dsn:
+        parts = urlsplit(dsn)
+        # mysql:// → mysql+pymysql://
+        scheme = parts.scheme
+        if scheme == "mysql":
+            scheme = "mysql+pymysql"
+        return urlunsplit((scheme, parts.netloc, parts.path, _strip_go_params(parts.query), ""))
+
+    # Go DSN 格式：[user[:password]@][tcp(]host[:port][)]/db[?params]
+    # 去掉 tcp() 包装
+    dsn = re.sub(r"tcp\(([^)]+)\)", r"\1", dsn)
+
+    # user:pass@host:port/db?query → mysql+pymysql://user:pass@host:port/db?query
+    url = f"mysql+pymysql://{dsn}"
+    parts = urlsplit(url)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, _strip_go_params(parts.query), ""))
+
 
 def get_database_engine(env_path: str = ".env") -> Engine:
     """创建数据库引擎"""
     load_dotenv(env_path)
-    host = os.getenv("MYSQL_HOST")
-    port = os.getenv("MYSQL_PORT")
-    database = os.getenv("MYSQL_DATABASE")
-    user = os.getenv("MYSQL_USER")
-    password = os.getenv("MYSQL_PASSWORD")
-
-    engine = create_engine(
-        f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}",
-        connect_args={
-            # 对于MySQL，可以在连接参数中指定时区
-            # "init_command": "SET time_zone='+00:00'",  # UTC时间
-            # 或者使用本地时区，例如：
-            # "init_command": "SET time_zone='+08:00'",  # 中国标准时间
-        },
+    dsn = os.getenv(
+        "MYSQL_URL",
+        "root:@127.0.0.1:3306/?charset=utf8mb4",
     )
+    url = _to_sqlalchemy_url(dsn)
+
+    engine = create_engine(url, connect_args={})
 
     try:
         with engine.connect() as connection:
@@ -123,12 +162,12 @@ async def mysql_to_redis_and_csv(
         id = f"{idx1}_{idx2}"
         key = f"{key_prefix}:{id}"
 
-        # 转换行数据为字典（处理 NaN 为 None 或空字符串）
+        # 转换行数据为字典(处理 NaN 为 None 或空字符串)
         row_dict = row.where(pd.notna(row), "").to_dict()
 
-        # 1. 写入完整数据到 Hash（自动覆盖）
+        # 1. 写入完整数据到 Hash(自动覆盖)
         pipe.hset(key, mapping=row_dict)
-        # 2. 写入 ZSet 索引：score = 开仓时间戳（空值用 0 兜底）
+        # 2. 写入 ZSet 索引：score = 开仓时间戳(空值用 0 兜底)
         score = row["open_at"]
         if score is None or pd.isna(score):
             score = 0

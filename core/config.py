@@ -13,10 +13,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = metadata["Name"]
 
-    REDIS_HOST: str = "192.168.123.7"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
-    REDIS_PASSWORD: str = ""
+    REDIS_URL: str = "redis://192.168.123.7:6379/0"
 
     PROJECT_DESCRIPTION: str = (
         f"{metadata['Summary']}, FastAPI提供: clash订阅转换、redis API"
