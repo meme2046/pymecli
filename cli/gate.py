@@ -21,10 +21,12 @@ def rsync(
     try:
 
         async def _run():
-            await grid_open(engine, redis)
-            await grid_close(engine, redis)
+            try:
+                await grid_open(engine, redis)
+                await grid_close(engine, redis)
+            finally:
+                await redis.close()
 
         asyncio.run(_run())
     finally:
         engine.dispose()
-        asyncio.run(redis.close())
