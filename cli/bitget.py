@@ -14,6 +14,7 @@ from crypto.bitget import (
     spot_tickers,
 )
 from utils.mysql import get_database_engine
+from utils.pyredis import get_redis_client
 
 app = typer.Typer()
 
@@ -27,18 +28,22 @@ def sync(
 ):
     """同步mysql中grid数据到redis"""
     engine = get_database_engine(env_path)
+    redis = get_redis_client()
     try:
-        asyncio.run(grid_open(engine))
-        asyncio.run(grid_close(engine))
 
-        asyncio.run(bitget_sf_open(engine))
-        asyncio.run(bitget_sf_close(engine))
+        async def _run():
+            await grid_open(engine, redis)
+            await grid_close(engine, redis)
+            await bitget_sf_open(engine, redis)
+            await bitget_sf_close(engine, redis)
+            await bitget_ff_open(engine, redis)
+            await bitget_ff_pending(engine, redis)
+            await bitget_ff_close(engine, redis)
 
-        asyncio.run(bitget_ff_open(engine))
-        asyncio.run(bitget_ff_pending(engine))
-        asyncio.run(bitget_ff_close(engine))
+        asyncio.run(_run())
     finally:
         engine.dispose()
+        asyncio.run(redis.close())
 
 
 @app.command()

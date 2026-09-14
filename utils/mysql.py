@@ -121,6 +121,7 @@ async def mysql_to_redis_and_csv(
     d_column_names: list[str],
     pd_dtype: dict | None = None,
     del_column_names: list[str] = ["id", "created_at", "updated_at", "deleted_at"],
+    redis_client=None,
 ) -> int:
     # 查询数据
     df = pd.read_sql(query, engine, dtype=pd_dtype)
@@ -149,7 +150,8 @@ async def mysql_to_redis_and_csv(
             # df[col] = dt_to_timestamp(pd.to_datetime(df[col], errors="coerce"))
 
     # 数据写入redis
-    r = get_redis_client()
+    own_client = redis_client is None
+    r = redis_client or get_redis_client()
     try:
         pipe = r.pipeline()  # 启用 pipeline
         count = 0
@@ -178,7 +180,8 @@ async def mysql_to_redis_and_csv(
         await pipe.execute()
         logger.debug(f"🧱 to redis: {count}")
     finally:
-        await r.close()
+        if own_client:
+            await r.close()
 
     df.to_csv(
         csv_fp,
@@ -226,6 +229,7 @@ async def mysql_to_redis(
     d_column_names: list[str],
     pd_dtype: dict | None = None,
     del_column_names: list[str] = ["id", "created_at", "updated_at", "deleted_at"],
+    redis_client=None,
 ) -> int:
     df = pd.read_sql(query, engine, dtype=pd_dtype)
     df["open_at"] = df["open_at"].fillna(df["created_at"])
@@ -249,7 +253,8 @@ async def mysql_to_redis(
         if col in df.columns:
             df[col] = dt_to_timestamp(df[col])
 
-    r = get_redis_client()
+    own_client = redis_client is None
+    r = redis_client or get_redis_client()
     try:
         pipe = r.pipeline()
         count = 0
@@ -275,7 +280,8 @@ async def mysql_to_redis(
         await pipe.execute()
         logger.debug(f"🧱 to redis: {count}")
     finally:
-        await r.close()
+        if own_client:
+            await r.close()
 
     return _update_status(engine, table, ids, update_status)
 

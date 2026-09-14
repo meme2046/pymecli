@@ -47,7 +47,7 @@ def spot_tickers(symbols: list, proxy: str | None = None):
     tickers(url, symbols, proxy)
 
 
-async def bitget_sf_open(engine: Engine):
+async def bitget_sf_open(engine: Engine, redis_client=None):
     query = "select * from bitget_sf where spot_open_usdt is not null and futures_open_usdt is not null and pnl is null and up_status = 0 and deleted_at is null;"
     key_prefix = "bitget_sf"
     table = "bitget_sf"
@@ -70,12 +70,13 @@ async def bitget_sf_open(engine: Engine):
             "spot_close_at": "datetime64[ns]",
             "futures_close_at": "datetime64[ns]",
         },
+        redis_client=redis_client,
     )
 
     logger.info(f"🚀 bitget SF open count:({row_count})")
 
 
-async def bitget_ff_open(engine: Engine):
+async def bitget_ff_open(engine: Engine, redis_client=None):
     key_prefix = "bitget_ff"
     table = "bitget_ff"
     query = f"select * from {table} where long_open_usdt is not null and short_open_usdt is not null and pnl is null and up_status = 0 and deleted_at is null;"
@@ -98,12 +99,13 @@ async def bitget_ff_open(engine: Engine):
             "long_close_at": "datetime64[ns]",
             "short_close_at": "datetime64[ns]",
         },
+        redis_client=redis_client,
     )
 
     logger.info(f"💰 bitget FF open count:({row_count})")
 
 
-async def bitget_sf_close(engine: Engine):
+async def bitget_sf_close(engine: Engine, redis_client=None):
     query = "select * from bitget_sf where pnl is not null and up_status in (0,1);"
     key_prefix = "bitget_sf"
     table = "bitget_sf"
@@ -126,12 +128,13 @@ async def bitget_sf_close(engine: Engine):
             "spot_close_at": "datetime64[ns]",
             "futures_close_at": "datetime64[ns]",
         },
+        redis_client=redis_client,
     )
 
     logger.info(f"🚀 bitget SF close count:({row_count})")
 
 
-async def bitget_ff_pending(engine: Engine):
+async def bitget_ff_pending(engine: Engine, redis_client=None):
     key_prefix = "bitget_ff"
     table = "bitget_ff"
     query = f"select * from {table} where pnl is null and (long_close_at is not null or short_close_at is not null) and up_status in (1);"
@@ -154,12 +157,13 @@ async def bitget_ff_pending(engine: Engine):
             "long_close_at": "datetime64[ns]",
             "short_close_at": "datetime64[ns]",
         },
+        redis_client=redis_client,
     )
 
     logger.info(f"💰 bitget FF pending count:({row_count})")
 
 
-async def bitget_ff_close(engine: Engine):
+async def bitget_ff_close(engine: Engine, redis_client=None):
     key_prefix = "bitget_ff"
     table = "bitget_ff"
     query = f"select * from {table} where pnl is not null and up_status in (0,1,2);"
@@ -182,12 +186,13 @@ async def bitget_ff_close(engine: Engine):
             "long_close_at": "datetime64[ns]",
             "short_close_at": "datetime64[ns]",
         },
+        redis_client=redis_client,
     )
 
     logger.info(f"💰 bitget FF close count:({row_count})")
 
 
-async def grid_open(engine: Engine):
+async def grid_open(engine: Engine, redis_client=None):
     query = "select * from bitget where ((cost is not null or benefit is not null) and profit is null) and up_status = 0 and order_id is not null and deleted_at is null;"
     key_prefix = "bitget_grid"
     table = "bitget"
@@ -206,12 +211,13 @@ async def grid_open(engine: Engine):
             "open_at": "datetime64[ns]",
             "close_at": "datetime64[ns]",
         },
+        redis_client=redis_client,
     )
 
     logger.info(f"🧮 bitget grid open count:({row_count})")
 
 
-async def grid_close(engine: Engine):
+async def grid_close(engine: Engine, redis_client=None):
     query = "select * from bitget where profit is not null and up_status in (0,1) and deleted_at is null;"
     key_prefix = "bitget_grid"
     table = "bitget"
@@ -230,6 +236,7 @@ async def grid_close(engine: Engine):
             "open_at": "datetime64[ns]",
             "close_at": "datetime64[ns]",
         },
+        redis_client=redis_client,
     )
 
     logger.info(f"🧮 bitget grid close count:({row_count})")

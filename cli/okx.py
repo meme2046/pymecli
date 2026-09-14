@@ -4,6 +4,7 @@ import typer
 
 from crypto.okx import grid_close, grid_open
 from utils.mysql import get_database_engine
+from utils.pyredis import get_redis_client
 
 app = typer.Typer()
 
@@ -17,8 +18,14 @@ def sync(
 ):
     """同步mysql中grid数据到redis"""
     engine = get_database_engine(env_path)
+    redis = get_redis_client()
     try:
-        asyncio.run(grid_open(engine))
-        asyncio.run(grid_close(engine))
+
+        async def _run():
+            await grid_open(engine, redis)
+            await grid_close(engine, redis)
+
+        asyncio.run(_run())
     finally:
         engine.dispose()
+        asyncio.run(redis.close())

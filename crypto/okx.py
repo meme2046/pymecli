@@ -4,7 +4,7 @@ from utils import logger
 from utils.mysql import mysql_to_redis
 
 
-async def grid_open(engine: Engine):
+async def grid_open(engine: Engine, redis_client=None):
     query = "select * from okx_spot where ((cost is not null or benefit is not null) and profit is null) and up_status = 0 and order_id is not null and deleted_at is null;"
     key_prefix = "okx_grid"
     table = "okx_spot"
@@ -23,12 +23,13 @@ async def grid_open(engine: Engine):
             "open_at": "datetime64[ns]",
             "close_at": "datetime64[ns]",
         },
+        redis_client=redis_client,
     )
 
     logger.info(f"🧮 okx grid open count:({row_count})")
 
 
-async def grid_close(engine: Engine):
+async def grid_close(engine: Engine, redis_client=None):
     query = "select * from okx_spot where profit is not null and up_status in (0,1) and deleted_at is null;"
     key_prefix = "okx_grid"
     table = "okx_spot"
@@ -47,6 +48,7 @@ async def grid_close(engine: Engine):
             "open_at": "datetime64[ns]",
             "close_at": "datetime64[ns]",
         },
+        redis_client=redis_client,
     )
 
     logger.info(f"🧮 okx grid close count:({row_count})")
