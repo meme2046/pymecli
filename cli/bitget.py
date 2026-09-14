@@ -27,16 +27,18 @@ def sync(
 ):
     """同步mysql中grid数据到redis"""
     engine = get_database_engine(env_path)
+    try:
+        asyncio.run(grid_open(engine))
+        asyncio.run(grid_close(engine))
 
-    asyncio.run(grid_open(engine))
-    asyncio.run(grid_close(engine))
+        asyncio.run(bitget_sf_open(engine))
+        asyncio.run(bitget_sf_close(engine))
 
-    asyncio.run(bitget_sf_open(engine))
-    asyncio.run(bitget_sf_close(engine))
-
-    asyncio.run(bitget_ff_open(engine))
-    asyncio.run(bitget_ff_pending(engine))
-    asyncio.run(bitget_ff_close(engine))
+        asyncio.run(bitget_ff_open(engine))
+        asyncio.run(bitget_ff_pending(engine))
+        asyncio.run(bitget_ff_close(engine))
+    finally:
+        engine.dispose()
 
 
 @app.command()

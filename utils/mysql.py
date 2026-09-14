@@ -150,32 +150,35 @@ async def mysql_to_redis_and_csv(
 
     # 数据写入redis
     r = get_redis_client()
-    pipe = r.pipeline()  # 启用 pipeline
-    count = 0
-    n1, n2 = d_column_names
+    try:
+        pipe = r.pipeline()  # 启用 pipeline
+        count = 0
+        n1, n2 = d_column_names
 
-    for _, row in df.iterrows():
-        idx1 = row[n1]
-        idx2 = row[n2]
-        if not idx1 or not idx2:
-            raise ValueError("ERR:id行无效")
-        id = f"{idx1}_{idx2}"
-        key = f"{key_prefix}:{id}"
+        for _, row in df.iterrows():
+            idx1 = row[n1]
+            idx2 = row[n2]
+            if not idx1 or not idx2:
+                raise ValueError("ERR:id行无效")
+            id = f"{idx1}_{idx2}"
+            key = f"{key_prefix}:{id}"
 
-        # 转换行数据为字典(处理 NaN 为 None 或空字符串)
-        row_dict = row.where(pd.notna(row), "").to_dict()
+            # 转换行数据为字典(处理 NaN 为 None 或空字符串)
+            row_dict = row.where(pd.notna(row), "").to_dict()
 
-        # 1. 写入完整数据到 Hash(自动覆盖)
-        pipe.hset(key, mapping=row_dict)
-        # 2. 写入 ZSet 索引：score = 开仓时间戳(空值用 0 兜底)
-        score = row["open_at"]
-        if score is None or pd.isna(score):
-            score = 0
-        pipe.zadd(f"by_time:{key_prefix}", {id: score})
-        count += 1
+            # 1. 写入完整数据到 Hash(自动覆盖)
+            pipe.hset(key, mapping=row_dict)
+            # 2. 写入 ZSet 索引：score = 开仓时间戳(空值用 0 兜底)
+            score = row["open_at"]
+            if score is None or pd.isna(score):
+                score = 0
+            pipe.zadd(f"by_time:{key_prefix}", {id: score})
+            count += 1
 
-    await pipe.execute()
-    logger.debug(f"🧱 to redis: {count}")
+        await pipe.execute()
+        logger.debug(f"🧱 to redis: {count}")
+    finally:
+        await r.close()
 
     df.to_csv(
         csv_fp,
@@ -247,29 +250,32 @@ async def mysql_to_redis(
             df[col] = dt_to_timestamp(df[col])
 
     r = get_redis_client()
-    pipe = r.pipeline()
-    count = 0
-    n1, n2 = d_column_names
+    try:
+        pipe = r.pipeline()
+        count = 0
+        n1, n2 = d_column_names
 
-    for _, row in df.iterrows():
-        idx1 = row[n1]
-        idx2 = row[n2]
-        if not idx1 or not idx2:
-            raise ValueError("ERR:id行无效")
-        id = f"{idx1}_{idx2}"
-        key = f"{key_prefix}:{id}"
+        for _, row in df.iterrows():
+            idx1 = row[n1]
+            idx2 = row[n2]
+            if not idx1 or not idx2:
+                raise ValueError("ERR:id行无效")
+            id = f"{idx1}_{idx2}"
+            key = f"{key_prefix}:{id}"
 
-        row_dict = row.where(pd.notna(row), "").to_dict()
+            row_dict = row.where(pd.notna(row), "").to_dict()
 
-        pipe.hset(key, mapping=row_dict)
-        score = row["open_at"]
-        if score is None or pd.isna(score):
-            score = 0
-        pipe.zadd(f"by_time:{key_prefix}", {id: score})
-        count += 1
+            pipe.hset(key, mapping=row_dict)
+            score = row["open_at"]
+            if score is None or pd.isna(score):
+                score = 0
+            pipe.zadd(f"by_time:{key_prefix}", {id: score})
+            count += 1
 
-    await pipe.execute()
-    logger.debug(f"🧱 to redis: {count}")
+        await pipe.execute()
+        logger.debug(f"🧱 to redis: {count}")
+    finally:
+        await r.close()
 
     return _update_status(engine, table, ids, update_status)
 

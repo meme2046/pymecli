@@ -177,7 +177,10 @@ def ipv6():
     print(f"IPv6 稳定地址: {ips}")
 
     r = get_redis_client_sync()
-    r.set("local.IPv6", ips[0])
+    try:
+        r.set("local.IPv6", ips[0])
+    finally:
+        r.close()
     return ips
 
 

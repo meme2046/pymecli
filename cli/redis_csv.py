@@ -86,7 +86,6 @@ async def csv_pd_redis(
         #         df[col] = pd.to_datetime(df[col], format="mixed")
         #         df[col] = dt_to_timestamp(df[col])
 
-        r = get_redis_client()
         pipe = r.pipeline()  # 启用 pipeline
         count = 0
 
@@ -141,7 +140,13 @@ def count(
     :type key_prefix: str
 
     """
-    asyncio.run(count_async(key_prefix))
+    async def _cmd():
+        try:
+            await count_async(key_prefix)
+        finally:
+            await r.close()
+
+    asyncio.run(_cmd())
 
 
 @app.command()
@@ -173,14 +178,18 @@ def csv2redis(
     :param fp: 说明
     :type fp: csv文件路径
     """
-    asyncio.run(
-        csv_pd_redis(
-            id1,
-            id2,
-            kp,
-            fp,
-        )
-    )
+    async def _cmd():
+        try:
+            await csv_pd_redis(
+                id1,
+                id2,
+                kp,
+                fp,
+            )
+        finally:
+            await r.close()
+
+    asyncio.run(_cmd())
 
 
 @app.command()

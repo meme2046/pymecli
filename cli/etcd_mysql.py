@@ -59,24 +59,28 @@ def mysql_to_etcd(
     engine = get_database_engine(env_path)
     etcd = get_etcd_client(env_path)
 
-    count = 0
-    with engine.connect() as conn:
-        if prefix:
-            query = text(
-                f"SELECT {key_col}, {val_col} FROM {table} WHERE {key_col} LIKE :p"
-            )
-            rows = conn.execute(query, {"p": f"{prefix}%"}).fetchall()
-        else:
-            query = text(f"SELECT {key_col}, {val_col} FROM {table}")
-            rows = conn.execute(query).fetchall()
+    try:
+        count = 0
+        with engine.connect() as conn:
+            if prefix:
+                query = text(
+                    f"SELECT {key_col}, {val_col} FROM {table} WHERE {key_col} LIKE :p"
+                )
+                rows = conn.execute(query, {"p": f"{prefix}%"}).fetchall()
+            else:
+                query = text(f"SELECT {key_col}, {val_col} FROM {table}")
+                rows = conn.execute(query).fetchall()
 
-        for row in rows:
-            k, v = str(row[0]), str(row[1])
-            etcd.put(k, v)
-            logger.debug(f"put: {k} -> {v}")
-            count += 1
+            for row in rows:
+                k, v = str(row[0]), str(row[1])
+                etcd.put(k, v)
+                logger.debug(f"put: {k} -> {v}")
+                count += 1
 
-    logger.info(f"✅ 已写入 {count} 条到 etcd")
+        logger.info(f"✅ 已写入 {count} 条到 etcd")
+    finally:
+        engine.dispose()
+        etcd.close()
 
 
 @app.command("etcd2mysql")
@@ -116,38 +120,42 @@ def etcd_to_mysql(
     engine = get_database_engine(env_path)
     etcd = get_etcd_client(env_path)
 
-    # get_prefix 不支持空前缀，全量时用 get_all
-    count = 0
-    with engine.connect() as conn:
-        iterator = etcd.get_all() if not prefix else etcd.get_prefix(prefix)
-        for value, meta in iterator:
-            k = meta.key.decode("utf-8")
-            v = value.decode("utf-8") if isinstance(value, bytes) else value
+    try:
+        # get_prefix 不支持空前缀，全量时用 get_all
+        count = 0
+        with engine.connect() as conn:
+            iterator = etcd.get_all() if not prefix else etcd.get_prefix(prefix)
+            for value, meta in iterator:
+                k = meta.key.decode("utf-8")
+                v = value.decode("utf-8") if isinstance(value, bytes) else value
 
-            # 检查是否存在
-            check_sql = text(
-                f"SELECT id FROM {table} WHERE {key_col} = :k LIMIT 1"
-            )
-            existing = conn.execute(check_sql, {"k": k}).fetchone()
-
-            if existing:
-                update_sql = text(
-                    f"UPDATE {table} SET {val_col} = :v WHERE {key_col} = :k"
+                # 检查是否存在
+                check_sql = text(
+                    f"SELECT id FROM {table} WHERE {key_col} = :k LIMIT 1"
                 )
-                conn.execute(update_sql, {"v": v, "k": k})
-                logger.debug(f"update: {k}")
-            else:
-                insert_sql = text(
-                    f"INSERT INTO {table} ({key_col}, {val_col}) VALUES (:k, :v)"
-                )
-                conn.execute(insert_sql, {"k": k, "v": v})
-                logger.debug(f"insert: {k}")
+                existing = conn.execute(check_sql, {"k": k}).fetchone()
 
-            count += 1
+                if existing:
+                    update_sql = text(
+                        f"UPDATE {table} SET {val_col} = :v WHERE {key_col} = :k"
+                    )
+                    conn.execute(update_sql, {"v": v, "k": k})
+                    logger.debug(f"update: {k}")
+                else:
+                    insert_sql = text(
+                        f"INSERT INTO {table} ({key_col}, {val_col}) VALUES (:k, :v)"
+                    )
+                    conn.execute(insert_sql, {"k": k, "v": v})
+                    logger.debug(f"insert: {k}")
 
-        conn.commit()
+                count += 1
 
-    logger.info(f"✅ 已同步 {count} 条到 MySQL")
+            conn.commit()
+
+        logger.info(f"✅ 已同步 {count} 条到 MySQL")
+    finally:
+        engine.dispose()
+        etcd.close()
 
 
 if __name__ == "__main__":

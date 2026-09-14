@@ -16,5 +16,8 @@ def rsync(
 ):
     """同步mysql中grid数据到redis"""
     engine = get_database_engine(env_path)
-    asyncio.run(grid_open(engine))
-    asyncio.run(grid_close(engine))
+    try:
+        asyncio.run(grid_open(engine))
+        asyncio.run(grid_close(engine))
+    finally:
+        engine.dispose()
