@@ -28,8 +28,8 @@ uv run dst cml d:/.backups/dontstarvetogether/modoverrides.lua -m 3486375086
 # etcdsync
 
 ```shell
-etcdsync etcd2mysql /test -e d:/.env/pymecli.env -t kvs
+etcdsync etcd2mysql /cron/jobs -e d:/.env/pymecli.env -t kvs
 etcdsync etcd2mysql "" -e d:/.env/pymecli.env -t kvs # 全量
-etcdsync mysql2etcd /test -e d:/.env/pymecli.env -t kvs
+etcdsync mysql2etcd /cron/jobs -e d:/.env/pymecli.env -t kvs
 etcdsync mysql2etcd -e d:/.env/pymecli.env -t kvs # 全量
 ```
