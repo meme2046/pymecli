@@ -13,13 +13,14 @@ from api.v1 import api_router
 from core.clash import ClashConfig, init_generator
 from core.config import settings
 from models.response import SuccessResponse
+from utils.pyredis import prepare_redis_url
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """管理应用生命周期的上下文管理器"""
     redis_pool = redis.ConnectionPool.from_url(
-        settings.REDIS_URL,
+        prepare_redis_url(settings.REDIS_URL),
         max_connections=20,  # 根据需要调整最大连接数
         decode_responses=True,
     )

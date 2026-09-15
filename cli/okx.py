@@ -18,7 +18,7 @@ def sync(
 ):
     """同步mysql中grid数据到redis"""
     engine = get_database_engine(env_path)
-    redis = get_redis_client()
+    redis = get_redis_client(env_path=env_path)
     try:
 
         async def _run():
