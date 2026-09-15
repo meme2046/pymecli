@@ -21,7 +21,6 @@ class Settings(BaseSettings):
     PROJECT_VERSION: str = metadata["Version"]
 
     class Config:
-        env_prefix = "PYME_CLI_"  # 添加环境变量前缀
         case_sensitive = True
 
     def reload(self):
