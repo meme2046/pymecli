@@ -38,7 +38,7 @@
   name = "pymecli"
   readme = "README.md"
   requires-python = ">=3.10"
-  version = "0.6.1"
+  version = "0.6.2"
 
 [project.urls]
   Homepage = "https://pypi.org/project/pymecli"
@@ -49,7 +49,7 @@
   bitget = "cli.bitget:app"
   dnspod = "cli.dnspod:app"
   dst = "cli.dst:app"
-  etcdsync = "cli.etcd_mysql:app"
+  etcdsync = "cli.etcd_sync:app"
   example = "cli.example:app"
   fast = "cli.fast:typer_app"
   gate = "cli.gate:app"

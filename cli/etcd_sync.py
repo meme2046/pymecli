@@ -1,11 +1,14 @@
 """
-MySQL <-> Etcd 数据同步 CLI。
+MySQL / JSON <-> Etcd 数据同步 CLI。
 
-两个子命令:
+四个子命令:
     mysql2etcd  将 MySQL kvs 表的 k, v 写入 etcd
     etcd2mysql  将 etcd 指定前缀的 key/value 写入 MySQL kvs 表
+    etcd2json   将 etcd 指定前缀的 key/value 导出为 JSON 文件
+    json2etcd   将 JSON 文件中的 key/value 写入 etcd
 """
 
+import json
 import logging
 import os
 
@@ -155,6 +158,107 @@ def etcd_to_mysql(
         logger.info(f"✅ 已同步 {count} 条到 MySQL")
     finally:
         engine.dispose()
+        etcd.close()
+
+
+@app.command("etcd2json")
+def etcd_to_json(
+    prefix: str = typer.Argument(
+        "",
+        help="etcd key 前缀（空字符串表示全量）",
+    ),
+    env_path: str = typer.Option(
+        ".env",
+        "--env",
+        "-e",
+        help="dotenv 文件路径",
+    ),
+    file_path: str = typer.Option(
+        ...,
+        "--file-path",
+        "-f",
+        help="输出 JSON 文件路径",
+    ),
+):
+    """将 etcd 中指定前缀的 key/value 导出为 JSON 文件。
+
+    JSON 格式为简单的 {key: value} 对象，value 均为字符串。
+    """
+    etcd = get_etcd_client(env_path)
+
+    try:
+        data: dict[str, str] = {}
+        iterator = etcd.get_all() if not prefix else etcd.get_prefix(prefix)
+        for value, meta in iterator:
+            k = meta.key.decode("utf-8")
+            v = value.decode("utf-8") if isinstance(value, bytes) else value
+            data[k] = v
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        logger.info(f"✅ 已导出 {len(data)} 条到 {file_path}")
+    except OSError as e:
+        logger.error("写入文件失败: %s", e)
+        raise typer.Exit(1)
+    finally:
+        etcd.close()
+
+
+@app.command("json2etcd")
+def json_to_etcd(
+    prefix: str = typer.Argument(
+        "",
+        help="写入 etcd 时给所有 key 加上的前缀（空表示不加）",
+    ),
+    env_path: str = typer.Option(
+        ".env",
+        "--env",
+        "-e",
+        help="dotenv 文件路径",
+    ),
+    file_path: str = typer.Option(
+        ...,
+        "--file-path",
+        "-f",
+        help="输入 JSON 文件路径",
+    ),
+):
+    """将 JSON 文件中的 key/value 写入 etcd。
+
+    JSON 格式应为 {key: value} 对象，value 会被转为字符串。
+    --prefix 会加到每个 key 前面（如果 key 本身已带该前缀则不重复加）。
+    """
+    etcd = get_etcd_client(env_path)
+
+    try:
+        with open(file_path, encoding="utf-8") as f:
+            data = json.load(f)
+    except OSError as e:
+        logger.error("读取文件失败: %s", e)
+        raise typer.Exit(1)
+    except json.JSONDecodeError as e:
+        logger.error("JSON 解析失败: %s", e)
+        raise typer.Exit(1)
+
+    if not isinstance(data, dict):
+        logger.error("JSON 顶层必须是对象 (dict)")
+        raise typer.Exit(1)
+
+    try:
+        count = 0
+        for k, v in data.items():
+            # 处理前缀：已带则不重复加
+            full_key = k
+            if prefix and not k.startswith(prefix):
+                full_key = prefix.rstrip("/") + "/" + k.lstrip("/")
+
+            etcd.put(full_key, str(v))
+            logger.debug("put: %s -> %s", full_key, v)
+            count += 1
+
+        logger.info(f"✅ 已写入 {count} 条到 etcd")
+    finally:
         etcd.close()
 
 
