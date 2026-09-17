@@ -33,3 +33,28 @@ etcdsync etcd2mysql "" -e d:/.env/pymecli.env -t kvs # 全量
 etcdsync mysql2etcd /cron/jobs -e d:/.env/pymecli.env -t kvs
 etcdsync mysql2etcd -e d:/.env/pymecli.env -t kvs # 全量
 ```
+# quark
+```shell
+# 执行签到（默认会发通知）
+uv run quark sign
+# 签到但不发通知
+uv run quark sign --no-notify
+# 指定不同的 dotenv 路径
+uv run quark sign -e /path/to/.env
+# 只检查账号状态（不签到），方便调试
+uv run quark check
+```
+
+# dnspod
+```shell
+# 列出域名下所有记录（先跑这个查 record_id）
+uv run dnspod list
+# 更新 IPv4 A 记录
+uv run dnspod ddns
+# 强制更新（即使 IP 没变化）
+uv run dnspod ddns --force
+# 更新 IPv6 AAAA 记录（从 Redis 读 local.IPv6）
+uv run dnspod ddns6
+
+uv run dnspod ddns6 --force
+```

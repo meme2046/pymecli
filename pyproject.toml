@@ -38,7 +38,7 @@
   name = "pymecli"
   readme = "README.md"
   requires-python = ">=3.10"
-  version = "0.6.0"
+  version = "0.6.1"
 
 [project.urls]
   Homepage = "https://pypi.org/project/pymecli"
@@ -47,12 +47,14 @@
 [project.scripts]
   # baidu = "cli.baidu:app"
   bitget = "cli.bitget:app"
+  dnspod = "cli.dnspod:app"
   dst = "cli.dst:app"
   etcdsync = "cli.etcd_mysql:app"
   example = "cli.example:app"
   fast = "cli.fast:typer_app"
   gate = "cli.gate:app"
   okx = "cli.okx:app"
+  quark = "cli.quark:app"
   util = "cli.util:app"
   # 临时命令
   rd = "cli.redis_csv:app"
