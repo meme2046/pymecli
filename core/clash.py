@@ -52,6 +52,30 @@ class ClashYamlGenerator:
 
     # ---------- 通用 helpers ----------
 
+    def _dedupe_proxy_names(self, existing_proxies: list, new_proxies: list, suffix: str = "_custom") -> list:
+        """对 new_proxies 里与 existing_proxies 重名的节点改名加后缀。
+
+        例：已有 "lighthouse"，custom 也有 "lighthouse" → 改名为 "lighthouse_custom"
+        再加一个 → "lighthouse_custom_2"
+        """
+        used = {p["name"] for p in existing_proxies}
+        result = []
+        for p in new_proxies:
+            name = p.get("name", "")
+            if name not in used:
+                used.add(name)
+                result.append(p)
+            else:
+                i = 1
+                new_name = f"{name}{suffix}"
+                while new_name in used:
+                    i += 1
+                    new_name = f"{name}{suffix}_{i}"
+                used.add(new_name)
+                renamed = {**p, "name": new_name}
+                result.append(renamed)
+        return result
+
     def _get_proxies(self):
         if not self.request_proxy:
             return None
@@ -150,15 +174,18 @@ class ClashYamlGenerator:
             "gfw": self._http_rule_provider("gfw", "domain"),
         }
 
-    def _provider_proxy_groups(self, sub_list):
+    def _provider_proxy_groups(self, sub_list, with_custom=False):
         """provider 风格的 proxy-groups(genPW / genPB)"""
         use_list = [f"provider.{item['name']}" for item in sub_list]
+        if with_custom:
+            use_list.append("provider.custom")
         return [
             {
                 "name": "全局选择",
                 "type": "select",
                 "proxies": ["自动选择", "手动选择", "轮询"]
-                + [item["name"] for item in sub_list],
+                + [item["name"] for item in sub_list]
+                + (["自定义节点"] if with_custom else []),
             },
             {
                 "name": "自动选择",
@@ -224,13 +251,18 @@ class ClashYamlGenerator:
         )
 
     def _add_inline_sub(self, template, item, ps):
-        """单个订阅直接写入 proxies + url-test group(genB)"""
-        template["proxies"].extend(ps)
+        """单个订阅直接写入 proxies + url-test group(genB)
+
+        重名节点自动加后缀（订阅名），group 里的 proxies 列表同步用重命名后的名字。
+        """
+        suffix = f"_{item['name']}" if item.get("name") else ""
+        deduped = self._dedupe_proxy_names(template["proxies"], ps, suffix)
+        template["proxies"].extend(deduped)
         template["proxy-groups"].append(
             {
                 "name": item["name"],
                 "type": "url-test",
-                "proxies": [p["name"] for p in ps],
+                "proxies": [p["name"] for p in deduped],
             }
         )
 
@@ -266,15 +298,34 @@ class ClashYamlGenerator:
     # ---------- 三种生成模式 ----------
 
     # 白名单模式 Rules 配置方式
-    def genPW(self, sub_list: list[dict]):
+    def genPW(self, sub_list: list[dict], custom_proxies: list | None = None):
         proxies = self._get_proxies()
         template = self._load_template(proxies)
 
-        template["proxy-groups"].extend(self._provider_proxy_groups(sub_list))
+        has_custom = bool(custom_proxies)
+        template["proxy-groups"].extend(self._provider_proxy_groups(sub_list, has_custom))
 
         subs, userinfo = self._fetch_subscriptions(sub_list, proxies)
         for item, ps in subs:
             self._add_provider_sub(template, item, ps)
+
+        # custom proxies → provider + group
+        if custom_proxies:
+            template["proxy-providers"]["provider.custom"] = {
+                "type": "inline",
+                "payload": custom_proxies,
+            }
+            template["proxy-groups"].append(
+                {
+                    "name": "自定义节点",
+                    "type": "url-test",
+                    "url": "https://www.gstatic.com/generate_204",
+                    "interval": 300,
+                    "tolerance": 11,
+                    "lazy": True,
+                    "use": ["provider.custom"],
+                }
+            )
 
         self._add_inline_rule_providers(template, proxies)
         template["rule-providers"].update(self._whitelist_http_rule_providers())
@@ -283,15 +334,34 @@ class ClashYamlGenerator:
         return template, userinfo
 
     # 黑名单模式 Rules 配置方式
-    def genPB(self, sub_list: list[dict]):
+    def genPB(self, sub_list: list[dict], custom_proxies: list | None = None):
         proxies = self._get_proxies()
         template = self._load_template(proxies)
 
-        template["proxy-groups"].extend(self._provider_proxy_groups(sub_list))
+        has_custom = bool(custom_proxies)
+        template["proxy-groups"].extend(self._provider_proxy_groups(sub_list, has_custom))
 
         subs, userinfo = self._fetch_subscriptions(sub_list, proxies)
         for item, ps in subs:
             self._add_provider_sub(template, item, ps)
+
+        # custom proxies → provider + group
+        if custom_proxies:
+            template["proxy-providers"]["provider.custom"] = {
+                "type": "inline",
+                "payload": custom_proxies,
+            }
+            template["proxy-groups"].append(
+                {
+                    "name": "自定义节点",
+                    "type": "url-test",
+                    "url": "https://www.gstatic.com/generate_204",
+                    "interval": 300,
+                    "tolerance": 11,
+                    "lazy": True,
+                    "use": ["provider.custom"],
+                }
+            )
 
         self._add_base_rules(template, with_dst_port=False)
         self._add_inline_rule_providers(template, proxies)
@@ -300,7 +370,7 @@ class ClashYamlGenerator:
 
         return template, userinfo
 
-    def genB(self, sub_list: list[dict]):
+    def genB(self, sub_list: list[dict], custom_proxies: list | None = None):
         proxies = self._get_proxies()
         template = self._load_template(proxies)
 
@@ -310,6 +380,11 @@ class ClashYamlGenerator:
         subs, userinfo = self._fetch_subscriptions(sub_list, proxies)
         for item, ps in subs:
             self._add_inline_sub(template, item, ps)
+
+        # custom proxies 去重后追加（proxy-groups 用 include-all 自动包含）
+        if custom_proxies:
+            deduped = self._dedupe_proxy_names(template["proxies"], custom_proxies)
+            template["proxies"].extend(deduped)
 
         self._add_base_rules(template, with_dst_port=True)
         self._add_inline_rule_providers(template, proxies)
