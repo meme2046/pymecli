@@ -25,6 +25,32 @@ logger = get_logger(__name__, level=logging.INFO)
 DEFAULT_TABLE = "kvs"
 
 
+# ---------------------------------------------------------------------------
+# 智能 JSON 转换（etcd ↔ 文件）
+# ---------------------------------------------------------------------------
+
+def _try_json_loads(s: str):
+    """尝试把字符串当 JSON 解析，成功返回对象，失败返回原字符串。
+
+    只接受以 { / [ 开头的内容，避免把 "123" "true" 这类普通值也误解析。
+    """
+    s = s.strip()
+    if not s or s[0] not in "{[":
+        return s
+    try:
+        return json.loads(s)
+    except (json.JSONDecodeError, TypeError):
+        return s
+
+
+def _json_or_str(v) -> str:
+    """dict/list → 紧凑 JSON 字符串；其他 → str(v)。"""
+    if isinstance(v, (dict, list)):
+        # separators=(",", ":") 去掉空格，保持 etcd 里原样
+        return json.dumps(v, ensure_ascii=False, separators=(",", ":"))
+    return str(v)
+
+
 @app.command("mysql2etcd")
 def mysql_to_etcd(
     prefix: str = typer.Argument(
@@ -182,17 +208,19 @@ def etcd_to_json(
 ):
     """将 etcd 中指定前缀的 key/value 导出为 JSON 文件。
 
-    JSON 格式为简单的 {key: value} 对象，value 均为字符串。
+    智能转换：如果 etcd value 是 JSON 字符串（以 { 或 [ 开头），
+    会自动解析为真正的 JSON 对象写入文件，编辑更方便；
+    普通字符串保持原样。
     """
     etcd = get_etcd_client(env_path)
 
     try:
-        data: dict[str, str] = {}
+        data: dict = {}
         iterator = etcd.get_all() if not prefix else etcd.get_prefix(prefix)
         for value, meta in iterator:
             k = meta.key.decode("utf-8")
-            v = value.decode("utf-8") if isinstance(value, bytes) else value
-            data[k] = v
+            raw = value.decode("utf-8") if isinstance(value, bytes) else value
+            data[k] = _try_json_loads(raw)
 
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
@@ -226,7 +254,8 @@ def json_to_etcd(
 ):
     """将 JSON 文件中的 key/value 写入 etcd。
 
-    JSON 格式应为 {key: value} 对象，value 会被转为字符串。
+    智能转换：dict/list 会自动序列化为紧凑 JSON 字符串写入 etcd；
+    字符串/数字/布尔保持 str() 转换。
     --prefix 会加到每个 key 前面（如果 key 本身已带该前缀则不重复加）。
     """
     etcd = get_etcd_client(env_path)
@@ -253,7 +282,7 @@ def json_to_etcd(
             if prefix and not k.startswith(prefix):
                 full_key = prefix.rstrip("/") + "/" + k.lstrip("/")
 
-            etcd.put(full_key, str(v))
+            etcd.put(full_key, _json_or_str(v))
             logger.debug("put: %s -> %s", full_key, v)
             count += 1
 

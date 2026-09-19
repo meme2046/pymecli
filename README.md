@@ -49,6 +49,15 @@ uv run quark check
 ```
 
 # dnspod
+## 环境变量说明
+- `DP_ID`:         DNSPod 登录 ID
+- `DP_TOKEN`:      DNSPod 登录 Token
+- `DP_DOMAIN`:     域名 (如 cursor.email)
+- `DP_RECORD_ID`:  IPv4 A 记录 ID
+- `DP_RECORD_ID_IPV6`: IPv6 AAAA 记录 ID
+- `DP_SUB_DOMAIN`: 子域名前缀 (默认 "api")
+- `DP_RECORD_LINE`: 记录线路 (默认 "默认")
+## 示例
 ```shell
 # 列出域名下所有记录（先跑这个查 record_id）
 uv run dnspod list
@@ -58,6 +67,5 @@ uv run dnspod ddns
 uv run dnspod ddns --force
 # 更新 IPv6 AAAA 记录（从 Redis 读 local.IPv6）
 uv run dnspod ddns6
-
 uv run dnspod ddns6 --force
 ```
