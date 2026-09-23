@@ -12,6 +12,8 @@ import pytz
 import typer
 from babel.dates import format_datetime
 from cowsay.__main__ import cli
+from tabulate import tabulate
+from wcwidth import wcswidth
 
 from utils.pyredis import get_redis_client_sync
 
@@ -65,24 +67,38 @@ def emoji():
     """
     打印自己常用的『emoji』符号
     """
-    emoji_list = [
-        "『",
-        "』",
-        "✓",
-        "✗",
-        "⤴︎",
-        "⤵︎",
-        "⇡",
-        "⇣",
-        "⤶",
-        "↩",
-        "↖",
-        "↙",
-        "↗",
-        "↘",
-        "╰›",
-    ]
-    print(emoji_list)
+    emoji_list = (
+        "『 』 ✓ ✗ ⇡ ⇣ ❎ ✅ 📢 🧪 🔎 🚀 🧮 💊 🐸 🐷 🐢"
+        " 🐶 🔖️ 📌 🐻 ☕ 🧸 📋 🍀 🍾 🥑 🍹"
+        " 🌞 🎉 🍼 🥇 🦊 🍉 🍈 🍑 🌐 🐠 🌱 🍭 💎 🎯 🌻"
+        " ⬇️ ⬆️ ↕️ 🍅 🍥 ☃️ 🐳 🤖 🪃 💰 🦣 🦄 🐼 ♂️ ♀️ 🐝"
+    ).split()
+
+    # 把每个 emoji 补到 len=2 且 wcswidth=2，保证 tabulate 算列宽和终端显示一致
+    # FE0F 是 emoji 变体检视符：加了之后 SMP emoji len 从 1 变 2，wcswidth 仍是 2
+    VS = "\ufe0f"
+
+    def pad(e: str) -> str:
+        w = wcswidth(e)
+        l = len(e)
+        # SMP emoji: len=1, wcsw=2 → 加 VS 变 len=2, wcsw=2
+        if l == 1 and w == 2:
+            e = e + VS
+        # 窄符号: wcsw=1 → 加空格补显示宽度
+        space = " " * max(0, 2 - wcswidth(e))
+        return e + space
+    padded = [pad(e) for e in emoji_list]
+
+    # 重排成 10 列的二维表，最后一行空位填空字符串
+    rows = []
+    for i in range(0, len(padded), 10):
+        row = padded[i : i + 10]
+        while len(row) < 10:
+            row.append("")
+        rows.append(row)
+
+    cols = [f"{i}" for i in range(1, 11)]
+    print(tabulate(rows, headers=cols, tablefmt="grid"))
 
 
 def strf_time(zone: str):
