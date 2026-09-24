@@ -75,14 +75,14 @@ def emoji():
     ).split()
 
     # tabulate 用 len() 算列宽，终端用 wcswidth() 算显示宽度，
-    # 需要把每个 emoji 补到 len=2 且 wcswidth=2 才能对齐
-    # - SMP emoji (len=1, wcsw=2): 加 VS(U+FE0F) 变 len=2
+    # 需要把每个字符补到 len=2 且 wcswidth=2 才能对齐
+    # - 宽字符 (len=1, wcsw=2): 加 ZWSP(U+200B 零宽空格) 补 len，不改显示
     # - 窄符号 (wcsw=1): 用 wcwidth.ljust 补空格到 wcsw=2
-    VS = "\ufe0f"
+    ZWSP = "\u200b"
 
     def pad(e: str) -> str:
         if len(e) == 1 and wcswidth(e) == 2:
-            e += VS
+            e += ZWSP
         return ljust(e, 2)
 
     padded = [pad(e) for e in emoji_list]
