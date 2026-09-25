@@ -59,7 +59,7 @@
   util = "cli.util:app"
   # 临时命令
   rd = "cli.redis_csv:app"
-  # tele = "cli.tele:app"
+  tele = "cli.tele:app"
 
 [tool.uv]
 [[tool.uv.index]]
