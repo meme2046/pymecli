@@ -24,15 +24,17 @@ app = typer.Typer()
 def sid(
     length: int = typer.Argument(30, help="生成secure_id的长度"),
 ):
+    # 剔除易混淆字符: i I l L o O 0 1
     chars = (
         (string.ascii_letters + string.digits)
-        .replace("i", "")
-        .replace("I", "")
-        .replace("o", "")
-        .replace("O", "")
+        .replace("i", "").replace("I", "")
+        .replace("l", "").replace("L", "")
+        .replace("o", "").replace("O", "")
+        .replace("0", "").replace("1", "")
     )
-    id = "".join(secrets.choice(chars) for _ in range(length))
-    print(id)
+    first = secrets.choice(string.ascii_letters)  # 字母开头
+    rest = "".join(secrets.choice(chars) for _ in range(max(0, length - 1)))
+    print(first + rest)
 
 
 @app.command()
