@@ -268,25 +268,25 @@ class ClashYamlGenerator:
 
     def _add_base_rules(self, template, with_dst_port=False):
         """IP-CIDR / DOMAIN 基础规则(genPB / genB),genB 含饥荒端口"""
-        template["rules"].extend(
-            [
-                "IP-CIDR,192.168.0.0/16,DIRECT,no-resolve",
-                "IP-CIDR,10.0.0.0/8,DIRECT,no-resolve",
-                "IP-CIDR,172.16.0.0/12,DIRECT,no-resolve",
-                "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
-            ]
-        )
-        if with_dst_port:
-            template["rules"].extend(
-                [
-                    "DST-PORT,10999,DIRECT",
-                    "DST-PORT,10998,DIRECT",
-                    "DST-PORT,27016,DIRECT",
-                    "DST-PORT,27017,DIRECT",
-                    "DST-PORT,8766,DIRECT",
-                    "DST-PORT,8767,DIRECT",
-                ]
-            )
+        # template["rules"].extend(
+        #     [
+        #         "IP-CIDR,192.168.0.0/16,DIRECT,no-resolve",
+        #         "IP-CIDR,10.0.0.0/8,DIRECT,no-resolve",
+        #         "IP-CIDR,172.16.0.0/12,DIRECT,no-resolve",
+        #         "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
+        #     ]
+        # )
+        # if with_dst_port:
+        #     template["rules"].extend(
+        #         [
+        #             "DST-PORT,10999,DIRECT",
+        #             "DST-PORT,10998,DIRECT",
+        #             "DST-PORT,27016,DIRECT",
+        #             "DST-PORT,27017,DIRECT",
+        #             "DST-PORT,8766,DIRECT",
+        #             "DST-PORT,8767,DIRECT",
+        #         ]
+        #     )
         template["rules"].extend(
             [
                 "DOMAIN,clash.razord.top,DIRECT",
