@@ -1,4 +1,9 @@
 {
   "workbench.colorTheme": "Noctis Minimus",
-  "python-envs.defaultEnvManager": "ms-python.python:system"
+  "python.analysis.typeCheckingMode": "standard",
+  "python.analysis.extraPaths": ["${workspaceFolder}"],
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportUnusedVariable": "warning"
+  }
 }

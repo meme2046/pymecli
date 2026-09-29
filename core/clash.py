@@ -7,7 +7,9 @@ from fastapi import Depends
 
 module_dir = Path(__file__).resolve().parent.parent
 
-TEMPLATE_URL = "https://raw.githubusercontent.com/meme2046/data/main/clash/template.yaml"
+TEMPLATE_URL = (
+    "https://raw.githubusercontent.com/meme2046/data/main/clash/template.yaml"
+)
 
 # 白名单模式最终规则
 WHITELIST_RULES = [
@@ -52,7 +54,9 @@ class ClashYamlGenerator:
 
     # ---------- 通用 helpers ----------
 
-    def _dedupe_proxy_names(self, existing_proxies: list, new_proxies: list, suffix: str = "_custom") -> list:
+    def _dedupe_proxy_names(
+        self, existing_proxies: list, new_proxies: list, suffix: str = "_custom"
+    ) -> list:
         """对 new_proxies 里与 existing_proxies 重名的节点改名加后缀。
 
         例：已有 "lighthouse"，custom 也有 "lighthouse" → 改名为 "lighthouse_custom"
@@ -268,25 +272,6 @@ class ClashYamlGenerator:
 
     def _add_base_rules(self, template, with_dst_port=False):
         """IP-CIDR / DOMAIN 基础规则(genPB / genB),genB 含饥荒端口"""
-        # template["rules"].extend(
-        #     [
-        #         "IP-CIDR,192.168.0.0/16,DIRECT,no-resolve",
-        #         "IP-CIDR,10.0.0.0/8,DIRECT,no-resolve",
-        #         "IP-CIDR,172.16.0.0/12,DIRECT,no-resolve",
-        #         "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
-        #     ]
-        # )
-        # if with_dst_port:
-        #     template["rules"].extend(
-        #         [
-        #             "DST-PORT,10999,DIRECT",
-        #             "DST-PORT,10998,DIRECT",
-        #             "DST-PORT,27016,DIRECT",
-        #             "DST-PORT,27017,DIRECT",
-        #             "DST-PORT,8766,DIRECT",
-        #             "DST-PORT,8767,DIRECT",
-        #         ]
-        #     )
         template["rules"].extend(
             [
                 "DOMAIN,clash.razord.top,DIRECT",
@@ -303,7 +288,9 @@ class ClashYamlGenerator:
         template = self._load_template(proxies)
 
         has_custom = bool(custom_proxies)
-        template["proxy-groups"].extend(self._provider_proxy_groups(sub_list, has_custom))
+        template["proxy-groups"].extend(
+            self._provider_proxy_groups(sub_list, has_custom)
+        )
 
         subs, userinfo = self._fetch_subscriptions(sub_list, proxies)
         for item, ps in subs:
@@ -339,7 +326,9 @@ class ClashYamlGenerator:
         template = self._load_template(proxies)
 
         has_custom = bool(custom_proxies)
-        template["proxy-groups"].extend(self._provider_proxy_groups(sub_list, has_custom))
+        template["proxy-groups"].extend(
+            self._provider_proxy_groups(sub_list, has_custom)
+        )
 
         subs, userinfo = self._fetch_subscriptions(sub_list, proxies)
         for item, ps in subs:
