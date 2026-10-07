@@ -127,10 +127,10 @@ class ClashYamlGenerator:
     def _add_inline_rule_providers(self, template, proxies):
         """从 my_rule_base_url 拉取 inline 规则集并写入 template"""
         rule_list = [
-            [f"{self.my_rule_base_url}/direct.yaml", "DIRECT"],
+            [f"{self.my_rule_base_url}/reject.yaml", "REJECT"],
             [f"{self.my_rule_base_url}/proxy.yaml", "全局选择"],
             [f"{self.my_rule_base_url}/round.yaml", "轮询"],
-            [f"{self.my_rule_base_url}/reject.yaml", "REJECT"],
+            [f"{self.my_rule_base_url}/direct.yaml", "DIRECT"],
         ]
         for url, target in rule_list:
             response = requests.get(url, proxies=proxies)
