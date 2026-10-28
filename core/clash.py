@@ -129,8 +129,8 @@ class ClashYamlGenerator:
         rule_list = [
             [f"{self.my_rule_base_url}/reject.yaml", "REJECT"],
             [f"{self.my_rule_base_url}/game.yaml", "手动选择"],
-            [f"{self.my_rule_base_url}/proxy.yaml", "全局选择"],
             [f"{self.my_rule_base_url}/round.yaml", "轮询"],
+            [f"{self.my_rule_base_url}/proxy.yaml", "全局选择"],
             [f"{self.my_rule_base_url}/direct.yaml", "DIRECT"],
         ]
         for url, target in rule_list:
