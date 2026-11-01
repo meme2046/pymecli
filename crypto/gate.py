@@ -1,7 +1,42 @@
+from decimal import Decimal
+
+import requests
 from sqlalchemy import Engine
 
 from utils import logger
 from utils.mysql import mysql_to_csv, mysql_to_redis
+
+
+def spot_tickers(symbols: list, proxy: str | None = None):
+    url = "https://api.gateio.ws/api/v4/spot/tickers"
+    proxies = None
+    if proxy:
+        proxies = {
+            "http": proxy,
+            "https": proxy,
+        }
+    response = requests.get(url, proxies=proxies)
+
+    resp_json = response.json()
+    pairs = []
+    for s in symbols:
+        s = s.lower().replace("_", "")
+        if not s.endswith("usdt"):
+            s += "usdt"
+        pairs.append(s[:-4] + "_usdt")
+    if response.status_code == 200:
+        results = []
+        for item in resp_json:
+            if item["currency_pair"].lower() in pairs:
+                price = Decimal(item["last"])
+                results.append(
+                    f"{item['currency_pair'].upper().replace('_USDT', '')}:{format(price, 'f')}"
+                )
+        logger.info(f"[{','.join(results)}]")
+    else:
+        logger.error(
+            f"📌 请求失败,状态码:{response.status_code},错误信息:{resp_json.get('label')},{resp_json.get('detail')}"
+        )
 
 
 async def grid_open(engine: Engine, redis_client=None):

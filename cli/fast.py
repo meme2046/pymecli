@@ -148,7 +148,7 @@ def run_app(
         None,
         "--proxy",
         "-p",
-        help="服务器代理,传入则通过代理转换Clash订阅,比如:socks5://127.0.0.1:7897",
+        help="服务器代理,传入则通过代理转换Clash订阅,比如:socks5://127.0.0.1:7890",
     ),
     redis_url: str = typer.Option(
         None,

@@ -1,7 +1,42 @@
+from decimal import Decimal
+
+import requests
 from sqlalchemy import Engine
 
 from utils import logger
 from utils.mysql import mysql_to_redis
+
+
+def spot_tickers(symbols: list, proxy: str | None = None):
+    url = "https://www.okx.com/api/v5/market/tickers?instType=SPOT"
+    proxies = None
+    if proxy:
+        proxies = {
+            "http": proxy,
+            "https": proxy,
+        }
+    response = requests.get(url, proxies=proxies)
+
+    resp_json = response.json()
+    inst_ids = []
+    for s in symbols:
+        s = s.lower().replace("-", "")
+        if not s.endswith("usdt"):
+            s += "usdt"
+        inst_ids.append(s[:-4] + "-usdt")
+    if response.status_code == 200 and resp_json.get("code") == "0":
+        results = []
+        for item in resp_json.get("data", []):
+            if item["instId"].lower() in inst_ids:
+                price = Decimal(item["last"])
+                results.append(
+                    f"{item['instId'].upper().replace('-USDT', '')}:{format(price, 'f')}"
+                )
+        logger.info(f"[{','.join(results)}]")
+    else:
+        logger.error(
+            f"📌 请求失败,状态码:{response.status_code},错误信息:{resp_json.get('msg')}"
+        )
 
 
 async def grid_open(engine: Engine, redis_client=None):
